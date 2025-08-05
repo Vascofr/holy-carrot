@@ -1,5 +1,8 @@
 package;
 
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.math.FlxRect;
 import openfl.events.Event;
 import lime.media.AudioContext;
 import js.html.MouseEvent;
@@ -115,7 +118,12 @@ class PlayState extends FlxState
 				add(player);
 				FlxG.camera.follow(player, FlxCameraFollowStyle.PLATFORMER);
 			case "carrot":
-				var carrot = new Carrot(entity.x + 27, entity.y - 100 + 80);
+				var carrot = new Carrot(entity.x + 28, entity.y - 18);
+				carrot.clipRect = new FlxRect(0, 0, 128, 53);
+				carrots.add(carrot);
+			case "carrot_x2":
+				var carrot = new Carrot(entity.x + 56, entity.y - 64, 2);
+				carrot.clipRect = new FlxRect(0, 0, 256, 106);
 				carrots.add(carrot);
 			
 		}
@@ -157,15 +165,32 @@ class PlayState extends FlxState
 
 	function playerCarrotOverlap(player:Player, carrot:Carrot):Void
 	{
+		if (carrot.state == 3) return;
+
 		carrot.overlappingPlayer = true;
 
 		if (carrot.state == 0) {
 			carrot.state = 1;
-			carrot.y -= 80;
+			if (carrot.size == 2) trace("state set to 1");
+			carrot.carrotHealth--;
+			carrot.y -= 67;
+			
+			if (carrot.carrotHealth <= 0) {
+				carrot.clipRect = null;
+				FlxTween.tween(carrot, { y: carrot.y - 12 }, 0.65, {type: PINGPONG, ease: FlxEase.quadInOut});
+			}
+			else {
+				carrot.clipRect = new FlxRect(0, 0, carrot.clipRect.width, carrot.clipRect.height + 67);
+			}
+			
 		}
 		else if (carrot.state == 2) {
-			carrot.kill();
-			player.carrots++;
+			FlxTween.tween(carrot, { y: carrot.y - 75, alpha: 0.25 }, 0.5, { ease: FlxEase.quadOut, onComplete: function(_) { carrot.kill(); }});
+			carrot.state = 3;
+			if (carrot.size == 2) trace("state set to 3");
+			carrot.flash();
+			//carrot.kill();
+			player.carrots += carrot.size;
 		}
 	}
 }

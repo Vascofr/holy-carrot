@@ -31,10 +31,10 @@ class Player extends FlxSprite
 	{
 		super(X, Y, "assets/images/player.png");
 
-		width = 122;
-		height = 96;
-		offset.x = 40;
-		offset.y = 53;
+		width = 102;
+		height = 90;
+		offset.x = 40 + 17;
+		offset.y = 59;
 
 		speed = iSpeed;
 		velocity.x = speed;
@@ -56,6 +56,8 @@ class Player extends FlxSprite
 					scale.x = 1.0;
 				}
 			}
+
+			offset.x = 40 + 20;
 		}
 		else {
 			if (velocity.x >= -0.1) {
@@ -67,6 +69,8 @@ class Player extends FlxSprite
 					scale.x = -1.0;
 				}
 			}
+			
+			offset.x = 40 - 1;
 		}
 
 
