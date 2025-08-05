@@ -76,7 +76,7 @@ class BloodParticle extends FlxParticle
             angularVelocity = 0.0;
             angularAcceleration = 0.0;
 
-            if (scale.x < 0.75) {
+            if (scale.x < 0.7) {
                 scale.x += elapsed * 0.4;
                 //scale.x = 1.0;
             }

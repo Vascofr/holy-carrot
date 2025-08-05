@@ -31,7 +31,13 @@ class Player extends FlxSprite
 
 	public function new(X:Float, Y:Float):Void
 	{
-		super(X, Y, "assets/images/player.png");
+		super(X, Y);
+
+		loadGraphic("assets/images/player.png", true, 200, 200);
+		animation.add("run", [0, 1, 2, 3], 8, true);
+		animation.add("climb", [0, 1, 2, 3], 10, true);
+		animation.add("jump", [0], 8, true);
+		animation.play("run");
 
 		width = 102;
 		height = 75;
@@ -61,7 +67,7 @@ class Player extends FlxSprite
 				}
 			}
 
-			offset.x = 40 + 20;
+			offset.x = 40 + 6;
 		}
 		else {
 			if (velocity.x >= -0.1) {
@@ -74,7 +80,7 @@ class Player extends FlxSprite
 				}
 			}
 			
-			offset.x = 40 - 1;
+			offset.x = 40 + 4;
 		}
 
 
@@ -91,6 +97,7 @@ class Player extends FlxSprite
 				jumpBuffer = 0.0;
 				wallJumpBuffer = 0.0;
 				FlxG.sound.play("assets/sounds/jump.mp3", 1.0);
+				animation.play("jump");
 			}
 
 			jumpBuffer -= elapsed;
@@ -138,8 +145,22 @@ class Player extends FlxSprite
 			}
 		}
 		
+		if (isTouching(DOWN)) {
+			animation.play("run");
+		}
+		else {
+			if (isTouching(LEFT) || isTouching(RIGHT)) {
+				animation.play("climb");
+			}
+			else {
+				animation.play("jump");
+			}			
+		}
+		
 
 		super.update(elapsed);
+
+		
 
 		if (velocity.y != 0.0) {
 			scale.y = 1.0 + Math.abs(velocity.y * 0.0001);

@@ -46,10 +46,16 @@ class PlayState extends FlxState
 
 	public var timers:FlxTimerManager = new FlxTimerManager();
 
+	var sawbladeSound:FlxSound;
+
+	//var waitTimeBeforeStart:Float = 1.5;
+
 	override public function create():Void
 	{
 		super.create();
 		flixelInit();
+
+		FlxG.camera.fade(FlxG.camera.bgColor, 0.5, true, null, true);
 
 		//FlxG.stage.addChild(new FPS(26, 26, 0x33dd33));
 
@@ -121,6 +127,11 @@ class PlayState extends FlxState
 
 	override public function update(elapsed:Float):Void
 	{
+		/*if (waitTimeBeforeStart > 0.0) {
+			waitTimeBeforeStart -= elapsed;
+
+			return;
+		}*/
 		super.update(elapsed);
 
 
@@ -267,7 +278,11 @@ class PlayState extends FlxState
 
 				bloodEmitter.emitting = true;
 
-				FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
+				sawbladeSound = FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
+				FlxG.timeScale = 0.4;
+				sawbladeSound.pitch = 0.9;
+				FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.0, { ease: FlxEase.quadOut	});  // keep these 2 the same
+				FlxTween.tween(sawbladeSound, { pitch: 1.0 }, 1.0, { ease: FlxEase.quadOut });  // keep these 2 the same
 
 				//bunnyEmitter.x = player.x + player.width * 0.5;
 				//bunnyEmitter.y = player.y + player.height * 0.5;
@@ -284,6 +299,12 @@ class PlayState extends FlxState
 
 			new FlxTimer(timers).start(0.37, function(t:FlxTimer) {
 				bloodEmitter.emitting = false;
+			});
+
+			new FlxTimer(timers).start(1.57, function(t:FlxTimer) {
+				FlxG.camera.fade(FlxG.camera.bgColor, 0.7, function() {
+					FlxG.switchState(PlayState.new);
+				});
 			});
 
 		}
