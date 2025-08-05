@@ -1,5 +1,6 @@
 package;
 
+import flixel.effects.particles.FlxEmitter;
 import flixel.FlxG;
 import flixel.FlxSprite;
 
@@ -7,7 +8,7 @@ class Player extends FlxSprite
 {
 	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 30, 50, 80, 120, 170, 250, 500];
 	
-	static public inline var iSpeed:Float = 400;
+	static public inline var iSpeed:Float = 390;
 	public var speed:Float = 0;
 	public var jumpHeight:Float = 800;  // 600
 	var justClicked:Bool = false;
@@ -27,14 +28,15 @@ class Player extends FlxSprite
 
 	public var level:Int = 1;
 
+
 	public function new(X:Float, Y:Float):Void
 	{
 		super(X, Y, "assets/images/player.png");
 
 		width = 102;
-		height = 90;
+		height = 75;
 		offset.x = 40 + 17;
-		offset.y = 59;
+		offset.y = 74;
 
 		speed = iSpeed;
 		velocity.x = speed;
@@ -45,6 +47,8 @@ class Player extends FlxSprite
 
 	override public function update(elapsed:Float):Void
 	{
+		if (!alive) return;
+
 
 		if (facingRight) {
 			if (velocity.x <= 0.1) {
@@ -78,7 +82,7 @@ class Player extends FlxSprite
 			justClicked = true;
 
 			jumpBuffer = jumpBufferMax;
-			wallJumpBuffer = wallJumpBufferMax;
+			if (level >= 2) wallJumpBuffer = wallJumpBufferMax;
 		}
 
 		if (jumpBuffer > 0.0) {
@@ -86,6 +90,7 @@ class Player extends FlxSprite
 				velocity.y = -jumpHeight;
 				jumpBuffer = 0.0;
 				wallJumpBuffer = 0.0;
+				FlxG.sound.play("assets/sounds/jump.mp3", 1.0);
 			}
 
 			jumpBuffer -= elapsed;
@@ -166,5 +171,14 @@ class Player extends FlxSprite
 	public function toAngle(tAngle:Float, turnSpeed:Float) {
 		targetAngle = tAngle;
 		angleTurnSpeed = turnSpeed;
+	}
+
+	public function deathBySawblade() {
+		//FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
+		alive = false;
+		velocity.set(0, 0);
+		setColorTransform(1.5, 1.5, 1.5);
+		FlxG.sound.play("assets/sounds/sawblade_start.mp3", 0.4);
+
 	}
 }

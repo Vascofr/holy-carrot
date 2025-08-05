@@ -1,5 +1,9 @@
 package;
 
+import particles.BunnyParticle;
+import particles.BloodParticle;
+import flixel.util.FlxTimer;
+import flixel.util.FlxTimer.FlxTimerManager;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.math.FlxRect;
@@ -35,13 +39,19 @@ class PlayState extends FlxState
 
 	var player:Player;
 	var carrots = new FlxTypedGroup<Carrot>();
+	var sawblades = new FlxTypedGroup<Sawblade>();
+
+	public var bloodEmitter:FlxEmitter;
+	public var bunnyEmitter:FlxEmitter;
+
+	public var timers:FlxTimerManager = new FlxTimerManager();
 
 	override public function create():Void
 	{
 		super.create();
 		flixelInit();
 
-		FlxG.stage.addChild(new FPS(26, 26, 0x33dd33));
+		//FlxG.stage.addChild(new FPS(26, 26, 0x33dd33));
 
 		ogmoLoader = new FlxOgmo3Loader("assets/ogmo/level.ogmo", "assets/ogmo/level.json");
 
@@ -56,10 +66,49 @@ class PlayState extends FlxState
 		add(tilemap);
 
 		add(carrots);
+		add(sawblades);
+
+		bloodEmitter = new FlxEmitter(FlxG.width * 0.5, FlxG.height * 0.5, 50);
+		bloodEmitter.particleClass = BloodParticle;
+		bloodEmitter.makeParticles(32, 32, 0xffffffff, 3000);
+		//bloodEmitter.loadParticles("assets/images/particle.png", 15000);
+		bloodEmitter.angularVelocity.set(-100, 100, -100, 100);
+		bloodEmitter.velocity.set(-4000, -4000, 4000, 4000, -2000, -2000, 2000, 2000);
+		bloodEmitter.alpha.set(0.7, 0.8, 0.7, 0.8);
+		bloodEmitter.color.set(0xffff0000, 0xffee0000, 0xffee0000, 0xffaa0000);
+		bloodEmitter.scale.set(0.5, 0.5, 0.5, 0.5);
+		bloodEmitter.lifespan.set(60, 63);
+		bloodEmitter.acceleration.set(0, 100, 0, 100);
+		bloodEmitter.drag.set(10, 10, 10, 10);
+		bloodEmitter.solid = true;
+		//bloodEmitter.blend = BlendMode.ADD;
+		bloodEmitter.start(false, 0.0005);
+		bloodEmitter.emitting = false;
+		add(bloodEmitter);
+
+		bunnyEmitter = new FlxEmitter(FlxG.width * 0.5, FlxG.height * 0.5, 50);
+		bunnyEmitter.particleClass = BunnyParticle;
+		//bunnyEmitter.makeParticles(32, 32, 0xffffffff, 3000);
+		bunnyEmitter.loadParticles("assets/images/gibs.png", 5, 0, true);
+		bunnyEmitter.angularVelocity.set(-180, 180, -180, 180);
+		bunnyEmitter.velocity.set(-4000, -4000, 4000, 4000, -2000, -2000, 2000, 2000);
+		//bunnyEmitter.alpha.set(0.7, 0.8, 0.7, 0.8);
+		//bunnyEmitter.color.set(0xffff0000, 0xffee0000, 0xffee0000, 0xffaa0000);
+		//bunnyEmitter.scale.set(0.5, 0.5, 0.5, 0.5);
+		bunnyEmitter.lifespan.set(60, 63);
+		bunnyEmitter.acceleration.set(0, 100, 0, 100);
+		bunnyEmitter.drag.set(10, 10, 10, 10);
+		bunnyEmitter.solid = true;
+		//bunnyEmitter.blend = BlendMode.ADD;
+		
+		//bunnyEmitter.emitting = false;
+		add(bunnyEmitter);
 
 		ogmoLoader.loadEntities(loadEntity, "entities");
 
 		tilemap.pixelPerfectPosition = true;
+
+		add(timers);
 		
 		/*decals = ogmoLoader.loadDecals("decals", "assets/ogmo");
 		decals.forEach(function(decal) {
@@ -73,6 +122,7 @@ class PlayState extends FlxState
 	override public function update(elapsed:Float):Void
 	{
 		super.update(elapsed);
+
 
 		if (player.speed > Player.iSpeed) {
 			var targetZoom = 1.0 - (player.speed - Player.iSpeed) * 0.001;
@@ -91,8 +141,10 @@ class PlayState extends FlxState
 		}
 		
 		FlxG.collide(player, tilemap, playerTileCollision);
-
+		FlxG.collide(bloodEmitter, tilemap);
+		FlxG.collide(bunnyEmitter, tilemap);
 		FlxG.overlap(player, carrots, playerCarrotOverlap);
+		FlxG.overlap(player, sawblades, playerSawbladeOverlap);
 	}
 
 	function flixelInit()
@@ -125,7 +177,9 @@ class PlayState extends FlxState
 				var carrot = new Carrot(entity.x + 56, entity.y - 64, 2);
 				carrot.clipRect = new FlxRect(0, 0, 256, 106);
 				carrots.add(carrot);
-			
+			case "sawblade":
+				var sawblade = new Sawblade(entity.x + 32, entity.y + 17);
+				sawblades.add(sawblade);
 		}
 	}
 
@@ -176,6 +230,7 @@ class PlayState extends FlxState
 			carrot.y -= 67;
 			
 			if (carrot.carrotHealth <= 0) {
+				carrot.flash();
 				carrot.clipRect = null;
 				FlxTween.tween(carrot, { y: carrot.y - 12 }, 0.65, {type: PINGPONG, ease: FlxEase.quadInOut});
 			}
@@ -191,6 +246,46 @@ class PlayState extends FlxState
 			carrot.flash();
 			//carrot.kill();
 			player.carrots += carrot.size;
+		}
+	}
+
+	function playerSawbladeOverlap(player:Player, sawblade:Sawblade):Void
+	{
+		if (player.alive) {
+			player.deathBySawblade();
+			
+			bloodEmitter.x = player.x + player.width * 0.5;
+			bloodEmitter.y = player.y + player.height * 0.5;
+			bloodEmitter.emitting = true;
+			new FlxTimer(timers).start(0.06, function(t:FlxTimer) {
+				bloodEmitter.emitting = false;
+			});
+
+			sawblade.animation.pause();
+			new FlxTimer(timers).start(0.27, function(t:FlxTimer) {
+				sawblade.animation.resume();
+
+				bloodEmitter.emitting = true;
+
+				FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
+
+				//bunnyEmitter.x = player.x + player.width * 0.5;
+				//bunnyEmitter.y = player.y + player.height * 0.5;
+				//player.kill();
+				//bunnyEmitter.start(true);
+			});
+
+			new FlxTimer(timers).start(0.31, function(t:FlxTimer) {
+				bunnyEmitter.x = player.x + player.width * 0.5;
+				bunnyEmitter.y = player.y + player.height * 0.5;
+				player.kill();
+				bunnyEmitter.start(true);
+			});
+
+			new FlxTimer(timers).start(0.37, function(t:FlxTimer) {
+				bloodEmitter.emitting = false;
+			});
+
 		}
 	}
 }

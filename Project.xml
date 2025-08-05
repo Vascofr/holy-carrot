@@ -35,7 +35,7 @@
 	<haxedef name="web-audio" />
 
 
-	<!--<template path="html5-template/index.html" rename="index.html" if="html5" />-->
+	<template path="html5-template/index.html" rename="index.html" if="html5" />
 
 	<!-- _______________________________ Libraries ______________________________ -->
 
