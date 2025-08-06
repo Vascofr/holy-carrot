@@ -1,12 +1,15 @@
 package;
 
+import flixel.math.FlxAngle;
+import flixel.math.FlxPoint;
+import flixel.math.FlxMath;
 import flixel.FlxG;
 import flixel.FlxSprite;
 
 class Sawblade extends FlxSprite
 {
 
-	public function new(X:Float, Y:Float):Void
+	public function new(X:Float, Y:Float, Rotation:Float):Void
 	{
 		super(X, Y);
 
@@ -21,6 +24,33 @@ class Sawblade extends FlxSprite
 		height = 96;
 		offset.x = 37;
 		offset.y = 52;
+
+		angle = Rotation * FlxAngle.TO_DEG;
+		switch(angle) {
+			case 0:
+				y += 4;
+				offset.y += 2;
+			case 90:
+				x -= 138;
+				y += 20;
+				var widthTemp = width;
+				width = height;
+				height = widthTemp;
+				offset.x += 37;
+				offset.y -= 90;
+			case 180:
+				x -= 300;
+				y -= 118;
+				offset.y -= 52;
+			case 270:
+				x -= 31.5;
+				y -= 281;
+				var widthTemp = width;
+				width = height;
+				height = widthTemp;
+				offset.x += 93;
+				offset.y -= 92;
+		}
 
 	}
 

@@ -202,7 +202,7 @@ class PlayState extends FlxState
 			case "player":
 				player = new Player(entity.x, entity.y + 85);
 				if (Player.checkpoint != null) {
-					player.x = Player.checkpoint.x - player.width * 1.2;
+					player.x = Player.checkpoint.x - player.width * 1.18;
 					player.y = Player.checkpoint.y - player.height;
 					FlxG.timeScale = 0.6;
 					FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.34, { ease: FlxEase.quadOut });
@@ -222,7 +222,7 @@ class PlayState extends FlxState
 					carrots.add(carrot);
 				}
 			case "sawblade":
-				var sawblade = new Sawblade(entity.x + 37, entity.y + 17);
+				var sawblade = new Sawblade(entity.x + 37, entity.y + 17, entity.rotation);
 				sawblades.add(sawblade);
 			case "sunflower":
 				var checkpoint = new Checkpoint(entity.x - 1, entity.y - 30, entity.values.number);
@@ -263,6 +263,10 @@ class PlayState extends FlxState
 		else if (player.isTouching(LEFT)) {
 			player.toAngle(90.0, Player.slowTurnSpeed);
 		}
+
+		if (player.justTouched(UP)) {
+			player.roofRun = player.speed * 0.5;
+		}		
 	}
 
 	function playerCarrotOverlap(player:Player, carrot:Carrot):Void

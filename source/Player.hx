@@ -22,7 +22,7 @@ class Player extends FlxSprite
 	var wallJumpBufferMax:Float = 0.1;
 	var wallJumpBuffer:Float = 0.0;
 	public var facingRight:Bool = true;
-	var spriteFlipSpeed:Float = 14.0;
+	var spriteFlipSpeed:Float = 14.5;
 	
 	static public inline var quickTurnSpeed:Float = 2000;
 	static public inline var slowTurnSpeed:Float = 500;
@@ -31,6 +31,10 @@ class Player extends FlxSprite
 
 	public var carrots(default, set):Int = 0;
 
+	public var roofRun:Float = 0.0;
+	var roofRunLevel:Int = 3;
+
+	var iOffsetY:Float = 74;
 	
 
 	public function new(X:Float, Y:Float):Void
@@ -46,27 +50,30 @@ class Player extends FlxSprite
 		width = 102;
 		height = 75;
 		offset.x = 40 + 17;
-		offset.y = 74;
+		offset.y = iOffsetY;
 
 		speed = iSpeed;
-		velocity.x = speed;
 		acceleration.y = 2000;
 
 		jumpBuffer = jumpBufferMax;
 
 		if (checkpointNumber > 0) {
-			levelUp();
+			var effectOnly:Bool = false;
+			if (level != 1) effectOnly = true;
+
+			levelUp(effectOnly);
 
 			for (i in 0...checkpointNumber) {
-				levelUp();
+				levelUp(effectOnly);
 			}
 		}
+
+		velocity.x = speed;
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		if (!alive) return;
-
 
 		if (facingRight) {
 			if (velocity.x <= 0.1) {
@@ -165,8 +172,49 @@ class Player extends FlxSprite
 				animation.play("climb");
 			}
 			else {
-				animation.play("jump");
-			}			
+				if (!(isTouching(UP) && level >= roofRunLevel && roofRun > 0.0 && (FlxG.mouse.pressed || FlxG.keys.pressed.ANY))) {
+					animation.play("jump");
+				}
+			}
+		}
+
+		// roof running //
+		if (!(touching == UP)) {
+			roofRun = 0.0;
+			if (scale.y < 1.0) {
+				scale.y += spriteFlipSpeed * elapsed;
+				if (scale.y > 1.0) {
+					scale.y = 1.0;
+				}
+			}
+
+			if (offset.y < iOffsetY) {
+				offset.y += 200 * elapsed;
+				if (offset.y > iOffsetY) {
+					offset.y = iOffsetY;
+				}
+			}
+			
+			//animation.play("run");
+		}
+		else if (level >= roofRunLevel && roofRun > 0.0 && (FlxG.mouse.pressed || FlxG.keys.pressed.ANY)) {
+			//try not timing it out  roofRun -= 400 * elapsed;
+			velocity.y = -roofRun;
+
+			if (scale.y > -1.0) {
+				scale.y -= spriteFlipSpeed * elapsed;
+				if (scale.y < -1.0) {
+					scale.y = -1.0;
+				}
+			}
+
+			if (offset.y > iOffsetY - 35) {
+				offset.y -= 200 * elapsed;
+				if (offset.y < iOffsetY - 35) {
+					offset.y = iOffsetY - 35;
+				}
+			}
+			animation.play("climb");
 		}
 		
 
@@ -174,25 +222,29 @@ class Player extends FlxSprite
 
 		
 
-		if (velocity.y != 0.0) {
+		/*if (velocity.y != 0.0) {
 			scale.y = 1.0 + Math.abs(velocity.y * 0.0001);
 		}
 		else {
 			scale.y = 1.0;
-		}
+		}*/
 
 		justClicked = false;
 	}
 
-	public function levelUp() {
-		level++;
+	public function levelUp(effectOnly:Bool = false) {
+		if (!effectOnly) {
+			level++;
+		}
 		speed *= 1.15;
 		
 		jumpHeight *= 1.2;
-		if (PlayState.waitTimeBeforeStart <= 0.0) {
+
+		animation.getByName("run").frameRate = Std.int(animation.getByName("run").frameRate * 1.15);
+		animation.getByName("climb").frameRate = Std.int(animation.getByName("climb").frameRate * 1.15);
+
+		if (PlayState.waitTimeBeforeStart <= 0.0 && !effectOnly) {
 			FlxG.camera.flash(0xccffffff, 0.7);
-			animation.getByName("run").frameRate = Std.int(animation.getByName("run").frameRate * 1.15);
-			animation.getByName("climb").frameRate = Std.int(animation.getByName("climb").frameRate * 1.15);
 		}
 		
 	}
