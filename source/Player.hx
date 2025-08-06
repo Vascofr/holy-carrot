@@ -1,11 +1,16 @@
 package;
 
+import flixel.math.FlxPoint;
 import flixel.effects.particles.FlxEmitter;
 import flixel.FlxG;
 import flixel.FlxSprite;
 
 class Player extends FlxSprite
 {
+	static public var checkpoint:FlxPoint = null;
+	static public var checkpointNumber:Int = 0;
+	static public var level:Int = 1;
+
 	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 30, 50, 80, 120, 170, 250, 500];
 	
 	static public inline var iSpeed:Float = 390;
@@ -26,8 +31,7 @@ class Player extends FlxSprite
 
 	public var carrots(default, set):Int = 0;
 
-	public var level:Int = 1;
-
+	
 
 	public function new(X:Float, Y:Float):Void
 	{
@@ -49,6 +53,14 @@ class Player extends FlxSprite
 		acceleration.y = 2000;
 
 		jumpBuffer = jumpBufferMax;
+
+		if (checkpointNumber > 0) {
+			levelUp();
+
+			for (i in 0...checkpointNumber) {
+				levelUp();
+			}
+		}
 	}
 
 	override public function update(elapsed:Float):Void
@@ -175,8 +187,13 @@ class Player extends FlxSprite
 	public function levelUp() {
 		level++;
 		speed *= 1.15;
+		
 		jumpHeight *= 1.2;
-		FlxG.camera.flash(0xccffffff, 0.7);
+		if (PlayState.waitTimeBeforeStart <= 0.0) {
+			FlxG.camera.flash(0xccffffff, 0.7);
+			animation.getByName("run").frameRate = Std.int(animation.getByName("run").frameRate * 1.15);
+			animation.getByName("climb").frameRate = Std.int(animation.getByName("climb").frameRate * 1.15);
+		}
 		
 	}
 

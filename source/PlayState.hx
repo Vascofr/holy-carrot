@@ -30,7 +30,6 @@ import flixel.addons.editors.ogmo.FlxOgmo3Loader;
 
 class PlayState extends FlxState
 {
-
 	var particleEmitter:FlxEmitter;
 	
 	var ogmoLoader:FlxOgmo3Loader;
@@ -40,6 +39,7 @@ class PlayState extends FlxState
 	var player:Player;
 	var carrots = new FlxTypedGroup<Carrot>();
 	var sawblades = new FlxTypedGroup<Sawblade>();
+	var checkpoints = new FlxTypedGroup<Checkpoint>();
 
 	public var bloodEmitter:FlxEmitter;
 	public var bunnyEmitter:FlxEmitter;
@@ -48,14 +48,22 @@ class PlayState extends FlxState
 
 	var sawbladeSound:FlxSound;
 
-	var waitTimeBeforeStart:Float = 0.4;
+	static public var waitTimeBeforeStart:Float = 0.0;  // set in create()
 
 	var fadeSprite:FlxSprite;
+
+	static var firstRun:Bool = true;
 
 	override public function create():Void
 	{
 		super.create();
 		flixelInit();
+
+		if (firstRun) {
+			loadSave();
+		}
+
+		waitTimeBeforeStart = 0.4;
 
 		//FlxG.stage.addChild(new FPS(26, 26, 0x33dd33));
 
@@ -71,6 +79,7 @@ class PlayState extends FlxState
 		tilemap.follow();
 		add(tilemap);
 
+		add(checkpoints);
 		add(carrots);
 		add(sawblades);
 
@@ -131,6 +140,7 @@ class PlayState extends FlxState
 		fadeSprite.scrollFactor.set(0.0, 0.0);
 		add(fadeSprite);
 		
+		firstRun = false;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -151,7 +161,7 @@ class PlayState extends FlxState
 			var targetZoom = 1.0 - (player.speed - Player.iSpeed) * 0.001;
 
 			if (FlxG.camera.zoom > targetZoom) {
-				FlxG.camera.zoom -= 0.1 * elapsed;
+				FlxG.camera.zoom -= 0.09 * elapsed;
 				if (FlxG.camera.zoom < targetZoom) {
 					FlxG.camera.zoom = targetZoom;
 				}
@@ -168,6 +178,7 @@ class PlayState extends FlxState
 		FlxG.collide(bunnyEmitter, tilemap);
 		FlxG.overlap(player, carrots, playerCarrotOverlap);
 		FlxG.overlap(player, sawblades, playerSawbladeOverlap);
+		FlxG.overlap(player, checkpoints, playerCheckpointOverlap);
 	}
 
 	function flixelInit()
@@ -189,20 +200,34 @@ class PlayState extends FlxState
 		switch (entity.name)
 		{
 			case "player":
-				player = new Player(entity.x, entity.y + 35);
+				player = new Player(entity.x, entity.y + 85);
+				if (Player.checkpoint != null) {
+					player.x = Player.checkpoint.x - player.width * 1.2;
+					player.y = Player.checkpoint.y - player.height;
+					FlxG.timeScale = 0.6;
+					FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.34, { ease: FlxEase.quadOut });
+				}
 				add(player);
 				FlxG.camera.follow(player, FlxCameraFollowStyle.PLATFORMER);
 			case "carrot":
-				var carrot = new Carrot(entity.x + 28, entity.y - 18);
-				carrot.clipRect = new FlxRect(0, 0, 128, 53);
-				carrots.add(carrot);
+				var carrot = new Carrot(entity.x + 28, entity.y - 18, entity.values.check_num);
+				if (carrot.checkNum >= Player.checkpointNumber) {
+					carrot.clipRect = new FlxRect(0, 0, 128, 53);
+					carrots.add(carrot);
+				}
 			case "carrot_x2":
-				var carrot = new Carrot(entity.x + 56, entity.y - 64, 2);
-				carrot.clipRect = new FlxRect(0, 0, 256, 106);
-				carrots.add(carrot);
+				var carrot = new Carrot(entity.x + 56, entity.y - 64, entity.values.check_num, 2);
+				if (carrot.checkNum >= Player.checkpointNumber) {
+					carrot.clipRect = new FlxRect(0, 0, 256, 106);
+					carrots.add(carrot);
+				}
 			case "sawblade":
 				var sawblade = new Sawblade(entity.x + 37, entity.y + 17);
 				sawblades.add(sawblade);
+			case "sunflower":
+				var checkpoint = new Checkpoint(entity.x - 1, entity.y - 30, entity.values.number);
+				checkpoints.add(checkpoint);
+
 		}
 	}
 
@@ -248,7 +273,6 @@ class PlayState extends FlxState
 
 		if (carrot.state == 0) {
 			carrot.state = 1;
-			if (carrot.size == 2) trace("state set to 1");
 			carrot.carrotHealth--;
 			carrot.y -= 67;
 			
@@ -256,6 +280,9 @@ class PlayState extends FlxState
 				carrot.flash();
 				carrot.clipRect = null;
 				FlxTween.tween(carrot, { y: carrot.y - 12 }, 0.65, {type: PINGPONG, ease: FlxEase.quadInOut});
+				FlxTween.tween(carrot, { alpha: 1.0 }, 0.65 * 2, { type: LOOPING, onComplete: function(_) {
+					carrot.flash(true);
+				}});
 			}
 			else {
 				carrot.clipRect = new FlxRect(0, 0, carrot.clipRect.width, carrot.clipRect.height + 67);
@@ -263,9 +290,9 @@ class PlayState extends FlxState
 			
 		}
 		else if (carrot.state == 2) {
+			FlxTween.cancelTweensOf(carrot);
 			FlxTween.tween(carrot, { y: carrot.y - 75, alpha: 0.25 }, 0.5, { ease: FlxEase.quadOut, onComplete: function(_) { carrot.kill(); }});
 			carrot.state = 3;
-			if (carrot.size == 2) trace("state set to 3");
 			carrot.flash();
 			//carrot.kill();
 			player.carrots += carrot.size;
@@ -307,16 +334,33 @@ class PlayState extends FlxState
 				bunnyEmitter.y = player.y + player.height * 0.5;
 				player.kill();
 				bunnyEmitter.start(true);
+
+				FlxTween.tween(FlxG.camera, { zoom: FlxG.camera.zoom + 0.2}, 8.0, { ease: FlxEase.quadIn });
 			});
 
 			new FlxTimer(timers).start(0.37, function(t:FlxTimer) {
-				bloodEmitter.emitting = false;
+				bloodEmitter.emitting = false;				
 			});
 
-			new FlxTimer(timers).start(3.70, function(t:FlxTimer) {
-				FlxG.camera.fade(FlxG.camera.bgColor, 0.26, function() {
+
+			new FlxTimer(timers).start(3.74, function(t:FlxTimer) {
+				
+
+				FlxG.camera.fade(FlxG.camera.bgColor, 0.3, function() {
+
+					// trying to prevent flickering //
+					tilemap.exists = false;
+					bgTilemap.exists = false;
+					bloodEmitter.exists = false;  
+					bunnyEmitter.exists = false;
+					sawblades.exists = false;
+					carrots.exists = false;
+					checkpoints.exists = false;
+					
+					fadeSprite.scale.set(FlxG.camera.zoom, FlxG.camera.zoom);
 					fadeSprite.exists = true;
 					FlxG.camera.stopFX();
+					FlxTween.cancelTweensOf(FlxG.camera);
 					//new FlxTimer(timers).start(1.0, function(t:FlxTimer) {
 						
 						FlxG.switchState(PlayState.new);
@@ -324,6 +368,45 @@ class PlayState extends FlxState
 				});
 			});
 
+		}
+	}
+
+	function playerCheckpointOverlap(player:Player, checkpoint:Checkpoint):Void
+	{
+		if (checkpoint.animation.name == "on") return;
+
+		checkpoint.animation.play("on");
+		checkpoint.flash();
+
+		if (Player.checkpoint == null) {
+			Player.checkpoint = new FlxPoint(checkpoint.x + checkpoint.width * 0.5, checkpoint.y + checkpoint.height - 54);
+		}
+		else {
+			Player.checkpoint.set(checkpoint.x + checkpoint.width * 0.5, checkpoint.y + checkpoint.height - 54);
+		}
+
+		Player.checkpointNumber = checkpoint.number;
+
+		saveGame();
+
+		//FlxG.sound.play("assets/sounds/checkpoint.mp3", 0.4);
+	}
+
+	function loadSave() {
+		if (FlxG.save.bind("player")) {
+			if (FlxG.save.data.checkpointNumber != null && FlxG.save.data.checkpointNumber > 0) {
+				Player.checkpointNumber = FlxG.save.data.checkpointNumber;
+				Player.checkpoint = new FlxPoint(FlxG.save.data.checkpointX, FlxG.save.data.checkpointY);
+			}
+		}
+	}
+
+	function saveGame() {
+		if (FlxG.save.bind("player")) {
+			FlxG.save.data.checkpointNumber = Player.checkpointNumber;
+			FlxG.save.data.checkpointX = Player.checkpoint.x;
+			FlxG.save.data.checkpointY = Player.checkpoint.y;
+			FlxG.save.flush();
 		}
 	}
 }

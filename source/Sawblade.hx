@@ -28,5 +28,5 @@ class Sawblade extends FlxSprite
 	{		
 		super.update(elapsed);
 	}
-
+	
 }

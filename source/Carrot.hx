@@ -9,16 +9,19 @@ class Carrot extends FlxSprite
 	public var overlappingPlayer:Bool = false;
 
 	var flashTime:Float = 0.0;
-	var flashSpeed:Float = 12;
+	var flashTimeMax:Float = 1.0;
+	var flashSpeed:Float = 1.5;
 	var flashing:Bool = false;
 	
 	public var carrotHealth:Int = 1;
 	public var size:Int = 1;
 
+	public var checkNum:Int = 0;
 
-	public function new(X:Float, Y:Float, Size:Int = 1):Void
+	public function new(X:Float, Y:Float, CheckNum:Int = 0, Size:Int = 1):Void
 	{
 		carrotHealth = size = Size;
+		checkNum = CheckNum;
 
 		if (size == 1) {
 			super(X, Y, "assets/images/carrot.png");
@@ -41,11 +44,9 @@ class Carrot extends FlxSprite
 
 		if (state == 1 && !overlappingPlayer) {
 			if (carrotHealth <= 0) {
-				if (size == 2) trace("state set to 2");
 				state = 2;
 			}
 			else {
-				if (size == 2) trace("state set to 0");
 				state = 0;
 			}
 		}
@@ -56,8 +57,8 @@ class Carrot extends FlxSprite
 
 			if (flashing) {
 				flashTime += flashSpeed * elapsed;
-				if (flashTime >= 1.0) {
-					flashTime = 1.0;
+				if (flashTime >= flashTimeMax) {
+					flashTime = flashTimeMax;
 					flashing = false;
 				}
 			}
@@ -73,8 +74,18 @@ class Carrot extends FlxSprite
 		overlappingPlayer = false;
 	}
 
-	public function flash() {
-		flashTime = flashSpeed * FlxG.elapsed;
-		flashing = true;
+	public function flash(small:Bool = false) {
+		if (!small) {
+			flashSpeed = 12;
+			flashTime = flashSpeed * FlxG.elapsed;
+			flashTimeMax = 1.0;
+			flashing = true;
+		}
+		else {
+			flashSpeed = 1.5;
+			flashTime = flashSpeed * FlxG.elapsed;
+			flashTimeMax = 0.25;
+			flashing = true;
+		}
 	}
 }
