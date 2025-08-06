@@ -66,18 +66,23 @@ class BunnyParticle extends FlxParticle
 
         if (isTouching(DOWN)) {
             active = false;
-            velocity.set(0.0, 0.0);
-            acceleration.set(0.0, 0.0);
-            drag.x = 1000;
+            
+            //velocity.set(0.0, 0.0);
+            //acceleration.set(0.0, 0.0);
+            //drag.x = 20;
             if (scale.x < 1.0) {
                 scale.x += elapsed * 0.5;
             }
             //angle = 0.0;
+            angularDrag = 1000;
             angularVelocity = 0.0;
             angularAcceleration = 0.0;
         }
 
-        else
+        else {
+            drag.x = 10;   // same as in PlayState.hx
+
             super.update(elapsed);
+        }
     }
 }

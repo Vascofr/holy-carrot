@@ -17,9 +17,9 @@ class Sawblade extends FlxSprite
 
 		animation.add("jammed", [0], 60, false);
 
-		width = 236;
+		width = 226;
 		height = 96;
-		offset.x = 32;
+		offset.x = 37;
 		offset.y = 52;
 
 	}
