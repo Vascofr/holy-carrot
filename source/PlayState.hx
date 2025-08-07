@@ -173,7 +173,7 @@ class PlayState extends FlxState
 			return;
 		}
 
-		FlxG.timeScale = 1.2;
+		//FlxG.timeScale = 1.2;
 
 		super.update(elapsed);
 

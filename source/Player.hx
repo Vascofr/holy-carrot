@@ -12,7 +12,7 @@ class Player extends FlxSprite
 	static public var checkpointFlipped:Bool = false;
 	static public var level:Int = 1;
 
-	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 45, 56, 72, 100];
+	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 39, 56, 72, 100];
 	
 	static public inline var iSpeed:Float = 390;
 	public var speed:Float = 0;
@@ -33,7 +33,7 @@ class Player extends FlxSprite
 	public var carrots(default, set):Int = 0;
 
 	public var roofRun:Float = 0.0;
-	var roofRunLevel:Int = 3;
+	var roofRunLevel:Int = 4;
 
 	var iOffsetY:Float = 74;
 	
@@ -58,12 +58,12 @@ class Player extends FlxSprite
 
 		jumpBuffer = jumpBufferMax;
 
+		level = 1;
+
 		if (checkpointNumber > 0) {
 
-			level = checkpointNumber + 2;
-
 			var effectOnly:Bool = false;
-			if (level != 1) effectOnly = true;
+			//if (level != 1) effectOnly = true;
 
 			levelUp(effectOnly);
 
@@ -78,6 +78,8 @@ class Player extends FlxSprite
 			carrots = 0;
 
 		velocity.x = speed;
+
+		maxVelocity.y = 2650;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -85,6 +87,7 @@ class Player extends FlxSprite
 		if (!alive) return;
 
 		//trace("carrots: " + carrots);
+
 
 		if (facingRight) {
 			if (velocity.x <= 0.1) {
@@ -209,7 +212,7 @@ class Player extends FlxSprite
 			//animation.play("run");
 		}
 		else if (level >= roofRunLevel && roofRun > 0.0 && (FlxG.mouse.pressed || FlxG.keys.pressed.ANY)) {
-			roofRun -= 400 * elapsed;  // just comment this if you want to try not timing it out  
+			roofRun -= 460 * elapsed;  // just comment this if you want to try not timing it out  
 			velocity.y = -roofRun;
 
 			if (scale.y > -1.0) {
@@ -250,6 +253,11 @@ class Player extends FlxSprite
 		speed *= 1.15;
 		
 		jumpHeight *= 1.2;
+
+		if (level >= 4) {
+			speed *= 1.15;
+			jumpHeight *= 0.95;
+		}
 
 		animation.getByName("run").frameRate = Std.int(animation.getByName("run").frameRate * 1.15);
 		animation.getByName("climb").frameRate = Std.int(animation.getByName("climb").frameRate * 1.15);
