@@ -10,12 +10,14 @@ class Checkpoint extends FlxSprite
 	var flashing:Bool = false;
 
 	public var number:Int = 0;
+	public var flipped:Bool = false;  // doesn't flip the sprite, only changes direction of player when spawned.
 
-	public function new(X:Float, Y:Float, Number:Int):Void
+	public function new(X:Float, Y:Float, Number:Int, Flipped:Bool):Void
 	{
 		super(X, Y);
 
 		number = Number;
+		flipped = Flipped;
 
 		loadGraphic("assets/images/sunflower.png", true, 122, 280);
 

@@ -227,7 +227,7 @@
       "resizeableY": false,
       "rotatable": false,
       "rotationDegrees": 360,
-      "canFlipX": false,
+      "canFlipX": true,
       "canFlipY": false,
       "canSetColor": false,
       "hasNodes": false,

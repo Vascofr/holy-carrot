@@ -1,5 +1,6 @@
 package;
 
+import flixel.text.FlxText;
 import particles.BunnyParticle;
 import particles.BloodParticle;
 import flixel.util.FlxTimer;
@@ -7,9 +8,6 @@ import flixel.util.FlxTimer.FlxTimerManager;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.math.FlxRect;
-import openfl.events.Event;
-import lime.media.AudioContext;
-import js.html.MouseEvent;
 import flixel.group.FlxGroup.FlxTypedGroup;
 import flixel.FlxCamera;
 import flixel.FlxSprite;
@@ -19,10 +17,8 @@ import openfl.display.FPS;
 import openfl.display.BlendMode;
 import flixel.util.FlxColor;
 import flixel.effects.particles.FlxEmitter;
-import flixel.effects.particles.FlxParticle;
 import flixel.FlxG;
 import flixel.FlxState;
-import particles.TopEmitter;
 import flixel.graphics.frames.FlxTileFrames;
 import flixel.tile.FlxTilemap;
 import flixel.addons.editors.ogmo.FlxOgmo3Loader;
@@ -54,6 +50,13 @@ class PlayState extends FlxState
 
 	static var firstRun:Bool = true;
 
+	var cameraHUD:FlxCamera;
+
+	var carrotHUDIcon:FlxSprite;
+	public var carrotHUDText:FlxText;
+
+	var startOver:Bool = false;
+
 	override public function create():Void
 	{
 		super.create();
@@ -64,6 +67,21 @@ class PlayState extends FlxState
 		}
 
 		waitTimeBeforeStart = 0.4;
+
+		
+		carrotHUDIcon = new FlxSprite(36, -88 - 3, "assets/images/carrot_hud_icon.png");
+		carrotHUDIcon.camera = cameraHUD;
+		add(carrotHUDIcon);
+
+		
+
+		carrotHUDText = new FlxText(122, -73 - 3, 200, "0 / 5", 52);
+		carrotHUDText.setFormat("assets/fonts/ChelseaMarket-Regular.ttf", 52, FlxColor.WHITE, FlxTextAlign.LEFT);
+		carrotHUDText.camera = cameraHUD;
+		add(carrotHUDText);
+
+		FlxTween.tween(carrotHUDIcon, { y: 18 - 3 }, 1.4, { startDelay: waitTimeBeforeStart + 0.4, ease: FlxEase.elasticOut });
+		FlxTween.tween(carrotHUDText, { y: 35 - 3 }, 1.4, { startDelay: waitTimeBeforeStart + 0.4, ease: FlxEase.elasticOut });
 
 		//FlxG.stage.addChild(new FPS(26, 26, 0x33dd33));
 
@@ -154,6 +172,9 @@ class PlayState extends FlxState
 
 			return;
 		}
+
+		FlxG.timeScale = 1.2;
+
 		super.update(elapsed);
 
 
@@ -193,6 +214,10 @@ class PlayState extends FlxState
 		//FlxG.camera.antialiasing = true;
 		FlxG.camera.bgColor = 0xff8d57f7;
 		FlxG.worldBounds.set(-100000, -100000, 200000, 200000);
+
+		cameraHUD = new FlxCamera(0, 0, FlxG.width, FlxG.height);
+		cameraHUD.bgColor = 0x0;
+		FlxG.cameras.add(cameraHUD);
 	}
 
 	function loadEntity(entity:EntityData):Void
@@ -204,6 +229,12 @@ class PlayState extends FlxState
 				if (Player.checkpoint != null) {
 					player.x = Player.checkpoint.x - player.width * 1.18;
 					player.y = Player.checkpoint.y - player.height;
+					if (Player.checkpointFlipped) {
+						player.facingRight = false;
+						player.scale.x = -1.0;
+						player.velocity.x *= -1;
+						player.x += player.width * 1.18;
+					}
 					FlxG.timeScale = 0.6;
 					FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.34, { ease: FlxEase.quadOut });
 				}
@@ -225,7 +256,7 @@ class PlayState extends FlxState
 				var sawblade = new Sawblade(entity.x + 37, entity.y + 17, entity.rotation);
 				sawblades.add(sawblade);
 			case "sunflower":
-				var checkpoint = new Checkpoint(entity.x - 12, entity.y - 71, entity.values.number);
+				var checkpoint = new Checkpoint(entity.x - 12, entity.y - 71, entity.values.number, entity.flippedX);
 				checkpoints.add(checkpoint);
 
 		}
@@ -321,7 +352,7 @@ class PlayState extends FlxState
 
 				bloodEmitter.emitting = true;
 
-				sawbladeSound = FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
+				//sawbladeSound = FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
 				FlxG.timeScale = 0.4;
 				//sawbladeSound.pitch = 0.9;
 				FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.0, { ease: FlxEase.quadOut });  // keep these 2 the same
@@ -344,10 +375,15 @@ class PlayState extends FlxState
 
 			new FlxTimer(timers).start(0.37, function(t:FlxTimer) {
 				bloodEmitter.emitting = false;				
+
+				FlxTween.tween(carrotHUDIcon, { y: -88 - 3 }, 1.4, { startDelay: 0.9, ease: FlxEase.elasticIn });
+				FlxTween.tween(carrotHUDText, { y: -73 - 3 }, 1.4, { startDelay: 0.9, ease: FlxEase.elasticIn });
 			});
 
 
 			new FlxTimer(timers).start(3.74, function(t:FlxTimer) {
+
+				
 				
 
 				FlxG.camera.fade(FlxG.camera.bgColor, 0.3, function() {
@@ -390,6 +426,7 @@ class PlayState extends FlxState
 		}
 
 		Player.checkpointNumber = checkpoint.number;
+		Player.checkpointFlipped = checkpoint.flipped;
 
 		saveGame();
 
@@ -397,10 +434,23 @@ class PlayState extends FlxState
 	}
 
 	function loadSave() {
-		if (FlxG.save.bind("player")) {
+		if (startOver) {
+			if (FlxG.save.bind("player")) {
+				// delete save if starting over //
+				FlxG.save.data.checkpointNumber = null;
+				FlxG.save.data.checkpointX = null;
+				FlxG.save.data.checkpointY = null;
+				FlxG.save.data.checkpointFlipped = null;
+				FlxG.save.flush();
+			}
+
+			startOver = false;
+		}
+		else if (FlxG.save.bind("player")) {
 			if (FlxG.save.data.checkpointNumber != null && FlxG.save.data.checkpointNumber > 0) {
 				Player.checkpointNumber = FlxG.save.data.checkpointNumber;
 				Player.checkpoint = new FlxPoint(FlxG.save.data.checkpointX, FlxG.save.data.checkpointY);
+				Player.checkpointFlipped = FlxG.save.data.checkpointFlipped;
 			}
 		}
 	}
@@ -410,6 +460,7 @@ class PlayState extends FlxState
 			FlxG.save.data.checkpointNumber = Player.checkpointNumber;
 			FlxG.save.data.checkpointX = Player.checkpoint.x;
 			FlxG.save.data.checkpointY = Player.checkpoint.y;
+			FlxG.save.data.checkpointFlipped = Player.checkpointFlipped;
 			FlxG.save.flush();
 		}
 	}

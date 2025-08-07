@@ -9,9 +9,10 @@ class Player extends FlxSprite
 {
 	static public var checkpoint:FlxPoint = null;
 	static public var checkpointNumber:Int = 0;
+	static public var checkpointFlipped:Bool = false;
 	static public var level:Int = 1;
 
-	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 30, 50, 80, 120, 170, 250, 500];
+	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 45, 56, 72, 100];
 	
 	static public inline var iSpeed:Float = 390;
 	public var speed:Float = 0;
@@ -58,6 +59,9 @@ class Player extends FlxSprite
 		jumpBuffer = jumpBufferMax;
 
 		if (checkpointNumber > 0) {
+
+			level = checkpointNumber + 2;
+
 			var effectOnly:Bool = false;
 			if (level != 1) effectOnly = true;
 
@@ -260,6 +264,8 @@ class Player extends FlxSprite
 		if (levelUpCarrotAmounts.contains(newValue) && (PlayState.waitTimeBeforeStart <= 0.0)) {
 			levelUp();
 		}
+
+		cast(FlxG.state, PlayState).carrotHUDText.text = newValue + "/" + levelUpCarrotAmounts[level - 1];
 		
 		return carrots = newValue;
 	}
@@ -274,7 +280,8 @@ class Player extends FlxSprite
 		alive = false;
 		velocity.set(0, 0);
 		setColorTransform(1.5, 1.5, 1.5);
-		FlxG.sound.play("assets/sounds/sawblade_start.mp3", 0.4);
+		//FlxG.sound.play("assets/sounds/sawblade_start.mp3", 0.4);
+		FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
 
 	}
 }
