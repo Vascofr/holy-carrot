@@ -179,7 +179,7 @@ class PlayState extends FlxState
 
 
 		if (player.speed > Player.iSpeed) {
-			var targetZoom = 1.0 - (player.speed - Player.iSpeed) * 0.001;
+			var targetZoom = 1.0 - (player.speed - Player.iSpeed) * 0.0008;
 
 			if (FlxG.camera.zoom > targetZoom) {
 				FlxG.camera.zoom -= 0.09 * elapsed;

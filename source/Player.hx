@@ -12,7 +12,7 @@ class Player extends FlxSprite
 	static public var checkpointFlipped:Bool = false;
 	static public var level:Int = 1;
 
-	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 39, 56, 72, 100];
+	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 40, 56, 72, 100];
 	
 	static public inline var iSpeed:Float = 390;
 	public var speed:Float = 0;
@@ -250,17 +250,23 @@ class Player extends FlxSprite
 		if (!effectOnly) {
 			level++;
 		}
-		speed *= 1.15;
-		
-		jumpHeight *= 1.2;
 
-		if (level >= 4) {
-			speed *= 1.15;
-			jumpHeight *= 0.95;
+		var speedFactor:Float = 1.15;
+		var jumpFactor:Float = 1.2;
+		switch (level) {
+			case 4:
+				speedFactor = 1.3225;
+				jumpFactor = 1.04;
+			case 5:
+				speedFactor = 1.362175;
 		}
 
-		animation.getByName("run").frameRate = Std.int(animation.getByName("run").frameRate * 1.15);
-		animation.getByName("climb").frameRate = Std.int(animation.getByName("climb").frameRate * 1.15);
+		speed *= speedFactor;		
+		jumpHeight *= jumpFactor;
+
+		animation.getByName("run").frameRate = Std.int(animation.getByName("run").frameRate * speedFactor);
+		animation.getByName("climb").frameRate = Std.int(animation.getByName("climb").frameRate * speedFactor);
+
 
 		if (PlayState.waitTimeBeforeStart <= 0.0 && !effectOnly) {
 			FlxG.camera.flash(0xccffffff, 0.7);
