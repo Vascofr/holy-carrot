@@ -17,7 +17,7 @@ class Checkpoint extends FlxSprite
 
 		number = Number;
 
-		loadGraphic("assets/images/sunflower.png", true, 103, 244);
+		loadGraphic("assets/images/sunflower.png", true, 122, 280);
 
 		animation.add("off", [0], 1, true);
 		animation.add("on", [1], 1, true);
@@ -26,6 +26,14 @@ class Checkpoint extends FlxSprite
 		if (number <= Player.checkpointNumber) {
 			animation.play("on");
 		}
+
+		width -= 30;
+		offset.x += 15;
+		x += 15;
+
+		height -= 15;
+		offset.y += 15;
+		y += 15;
 
 		//width = 226;
 		//height = 96;
@@ -60,6 +68,8 @@ class Checkpoint extends FlxSprite
 	public function flash() {
 		flashTime = flashSpeed * FlxG.elapsed;
 		flashing = true;
+
+		FlxG.camera.flash(0x11ffffff, 0.45);
 	}
 
 }

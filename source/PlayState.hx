@@ -225,7 +225,7 @@ class PlayState extends FlxState
 				var sawblade = new Sawblade(entity.x + 37, entity.y + 17, entity.rotation);
 				sawblades.add(sawblade);
 			case "sunflower":
-				var checkpoint = new Checkpoint(entity.x - 1, entity.y - 30, entity.values.number);
+				var checkpoint = new Checkpoint(entity.x - 12, entity.y - 71, entity.values.number);
 				checkpoints.add(checkpoint);
 
 		}

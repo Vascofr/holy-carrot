@@ -68,12 +68,19 @@ class Player extends FlxSprite
 			}
 		}
 
+		if (level > 1)
+			carrots = levelUpCarrotAmounts[level - 2];
+		else
+			carrots = 0;
+
 		velocity.x = speed;
 	}
 
 	override public function update(elapsed:Float):Void
 	{
 		if (!alive) return;
+
+		//trace("carrots: " + carrots);
 
 		if (facingRight) {
 			if (velocity.x <= 0.1) {
@@ -125,7 +132,7 @@ class Player extends FlxSprite
 		}
 		if (wallJumpBuffer > 0.0) {
 			if (isTouching(RIGHT)) {
-				velocity.y = -jumpHeight * 0.6;
+				velocity.y = -jumpHeight * 0.7;
 				velocity.x = -speed;
 				facingRight = false;
 
@@ -198,7 +205,7 @@ class Player extends FlxSprite
 			//animation.play("run");
 		}
 		else if (level >= roofRunLevel && roofRun > 0.0 && (FlxG.mouse.pressed || FlxG.keys.pressed.ANY)) {
-			//try not timing it out  roofRun -= 400 * elapsed;
+			roofRun -= 400 * elapsed;  // just comment this if you want to try not timing it out  
 			velocity.y = -roofRun;
 
 			if (scale.y > -1.0) {
@@ -246,12 +253,11 @@ class Player extends FlxSprite
 		if (PlayState.waitTimeBeforeStart <= 0.0 && !effectOnly) {
 			FlxG.camera.flash(0xccffffff, 0.7);
 		}
-		
 	}
 
 	function set_carrots(newValue:Int):Int
 	{
-		if (levelUpCarrotAmounts.contains(newValue)) {
+		if (levelUpCarrotAmounts.contains(newValue) && (PlayState.waitTimeBeforeStart <= 0.0)) {
 			levelUp();
 		}
 		
