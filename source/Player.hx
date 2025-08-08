@@ -12,7 +12,7 @@ class Player extends FlxSprite
 	static public var checkpointFlipped:Bool = false;
 	static public var level:Int = 1;
 
-	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 40, 56, 72, 100];
+	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 40, 46, 72, 100];
 	
 	static public inline var iSpeed:Float = 390;
 	public var speed:Float = 0;
