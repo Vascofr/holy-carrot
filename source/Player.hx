@@ -40,6 +40,10 @@ class Player extends FlxSprite
 	var stepSoundTime:Float = 0.0;
 	var stepSoundTimeMax:Float = 0.2;
 
+	public var finalSequence:Bool = false;
+	var behindHolyCarrot:Bool = false;
+
+
 	public function new(X:Float, Y:Float):Void
 	{
 		super(X, Y);
@@ -89,8 +93,57 @@ class Player extends FlxSprite
 	{
 		if (!alive) return;
 
-		//trace("carrots: " + carrots);
-		trace("x: " + x);
+		if (finalSequence) {
+			//speed = 400;
+			//spriteFlipSpeed = 8.0;
+			if (velocity.x > 0.0) velocity.x = speed;
+			else if (velocity.x < 0.0) velocity.x = -speed;
+
+			velocity.y = -115;
+			if (x < 12024) {
+				var playState:PlayState = cast(FlxG.state, PlayState);
+				x = 12024;
+				facingRight = true;
+				
+				if (behindHolyCarrot) {
+					behindHolyCarrot = false;
+					velocity.x = speed;
+					playState.playerBehindCarrotLayer.remove(this, true);
+					playState.playerLayer.add(this);
+				}
+				else {
+					behindHolyCarrot = true;
+					velocity.x = 0;
+					playState.playerLayer.remove(this, true);
+					playState.playerBehindCarrotLayer.add(this);
+				}
+			}
+			else if (x > 12638) {
+				var playState:PlayState = cast(FlxG.state, PlayState);
+				x = 12638;
+				facingRight = false;
+				if (behindHolyCarrot) {
+					behindHolyCarrot = false;
+					velocity.x = -speed;
+					playState.playerBehindCarrotLayer.remove(this, true);
+					playState.playerLayer.add(this);
+				}
+				else {
+					behindHolyCarrot = true;
+					velocity.x = 0;
+					playState.playerLayer.remove(this, true);
+					playState.playerBehindCarrotLayer.add(this);
+				}
+			}
+
+			if (y < 155) {
+				FlxG.camera.fade(0xffffffff, 3.5, false, 
+					function() {
+						FlxG.switchState(PlayState.new);
+					}
+				);
+			}
+		}
 
 		if (facingRight) {
 			if (velocity.x <= 0.1) {

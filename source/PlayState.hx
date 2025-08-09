@@ -13,8 +13,6 @@ import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.sound.FlxSound;
-import openfl.display.FPS;
-import openfl.display.BlendMode;
 import flixel.util.FlxColor;
 import flixel.effects.particles.FlxEmitter;
 import flixel.FlxG;
@@ -34,6 +32,8 @@ class PlayState extends FlxState
 	var fgTilemap:FlxTilemap;
 
 	var player:Player;
+	public var playerLayer = new FlxTypedGroup<Player>();
+	public var playerBehindCarrotLayer = new FlxTypedGroup<Player>();
 	var carrots = new FlxTypedGroup<Carrot>();
 	var sawblades = new FlxTypedGroup<Sawblade>();
 	var checkpoints = new FlxTypedGroup<Checkpoint>();
@@ -90,9 +90,9 @@ class PlayState extends FlxState
 		}
 		else if (waitingForMetalMusic){
 			//if (metalMusic == null) {
-			new FlxTimer(timers).start(0.2, function(t:FlxTimer) {
+			//new FlxTimer(timers).start(0.1, function(t:FlxTimer) {
 				FlxG.sound.playMusic("assets/music/metal.mp3", 0.2);
-			});
+			//});
 				
 			//}
 			//else {
@@ -121,8 +121,6 @@ class PlayState extends FlxState
 		FlxTween.tween(carrotHUDIcon, { y: 18 - 3 }, 1.4, { startDelay: waitTimeBeforeStart + 0.4, ease: FlxEase.elasticOut });
 		FlxTween.tween(carrotHUDText, { y: 35 - 3 }, 1.4, { startDelay: waitTimeBeforeStart + 0.4, ease: FlxEase.elasticOut });
 
-		//FlxG.stage.addChild(new FPS(26, 26, 0x33dd33));
-
 		ogmoLoader = new FlxOgmo3Loader("assets/ogmo/level.ogmo", "assets/ogmo/level.json");
 
 		bgTilemap = ogmoLoader.loadTilemap("assets/ogmo/tilemap.png", "background");
@@ -135,6 +133,7 @@ class PlayState extends FlxState
 		add(tilemap);
 
 		add(checkpoints);
+		add(playerBehindCarrotLayer);
 		add(carrots);
 		add(sawblades);
 
@@ -258,7 +257,8 @@ class PlayState extends FlxState
 
 		}
 
-		FlxG.collide(player, tilemap, playerTileCollision);
+		if (!player.finalSequence)
+			FlxG.collide(player, tilemap, playerTileCollision);
 		FlxG.collide(bloodEmitter, tilemap);
 		FlxG.collide(bunnyEmitter, tilemap);
 		FlxG.overlap(player, carrots, playerCarrotOverlap);
@@ -302,7 +302,8 @@ class PlayState extends FlxState
 					FlxG.timeScale = 0.6;
 					FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.34, { ease: FlxEase.quadOut });
 				}
-				add(player);
+				add(playerLayer);
+				playerLayer.add(player);
 				FlxG.camera.follow(player, FlxCameraFollowStyle.PLATFORMER);
 			case "carrot":
 				var carrot = new Carrot(entity.x + 28, entity.y - 18, entity.values.check_num);
@@ -314,6 +315,12 @@ class PlayState extends FlxState
 				var carrot = new Carrot(entity.x + 56, entity.y - 64, entity.values.check_num, 2);
 				if (carrot.checkNum >= Player.checkpointNumber) {
 					carrot.clipRect = new FlxRect(0, 0, 256, 106);
+					carrots.add(carrot);
+				}
+			case "carrot_x8":
+				var carrot = new Carrot(entity.x + 165, entity.y - 164, entity.values.check_num, 8);
+				if (carrot.checkNum >= Player.checkpointNumber) {
+					carrot.clipRect = new FlxRect(0, 0, 531, 1021);
 					carrots.add(carrot);
 				}
 			case "sawblade":
@@ -374,11 +381,27 @@ class PlayState extends FlxState
 			carrot.state = 1;
 			carrot.carrotHealth--;
 			carrot.y -= 67;
+			if (carrot.size == 16) carrot.y += 27;  // Holy Carrot
 			
 			if (carrot.carrotHealth <= 0) {
 				carrot.flash();
 				carrot.clipRect = null;
-				FlxTween.tween(carrot, { y: carrot.y - 12 }, 0.65, {type: PINGPONG, ease: FlxEase.quadInOut});
+				if (carrot.size == 16) {
+					FlxG.sound.play("assets/sounds/Angel Choir Steady Ahhhh - Sound Effect(FXssoundwarehouse).mp3", 0.7);
+					carrot.velocity.y = -100;
+					carrot.state = 4;
+					player.finalSequence = true;
+					player.animation.play("jump");
+					FlxTween.tween(player, { y: carrot.y + carrot.height * 0.35 }, 2.0);
+					//FlxTween.tween(FlxG, { timeScale: 0.5 }, 0.8);
+					FlxTween.tween(player, { speed: 300 }, 0.25);
+
+					FlxTween.tween(carrotHUDIcon, { y: -88 - 3 }, 1.4, { startDelay: 0.9, ease: FlxEase.elasticIn });
+					FlxTween.tween(carrotHUDText, { y: -73 - 3 }, 1.4, { startDelay: 0.9, ease: FlxEase.elasticIn });
+				}
+				else {
+					FlxTween.tween(carrot, { y: carrot.y - 12 }, 0.65, {type: PINGPONG, ease: FlxEase.quadInOut});
+				}
 				FlxTween.tween(carrot, { alpha: 1.0 }, 0.65 * 2, { type: LOOPING, onComplete: function(_) {
 					carrot.flash(true);
 				}});
@@ -393,7 +416,7 @@ class PlayState extends FlxState
 			FlxTween.tween(carrot, { y: carrot.y - 75, alpha: 0.25 }, 0.5, { ease: FlxEase.quadOut, onComplete: function(_) { carrot.kill(); }});
 			carrot.state = 3;
 			carrot.flash();
-			//carrot.kill();
+			
 			player.carrots += carrot.size;
 		}
 	}
@@ -436,8 +459,8 @@ class PlayState extends FlxState
 				//sawbladeSound = FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
 				FlxG.timeScale = 0.4;
 				//sawbladeSound.pitch = 0.9;
-				FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.0, { ease: FlxEase.quadOut });  // keep these 2 the same
-				//FlxTween.tween(sawbladeSound, { pitch: 1.0 }, 1.0, { ease: FlxEase.quadOut });  // keep these 2 the same
+				FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.0, { ease: FlxEase.quadOut });
+				//FlxTween.tween(sawbladeSound, { pitch: 1.0 }, 1.0, { ease: FlxEase.quadOut });
 
 				//bunnyEmitter.x = player.x + player.width * 0.5;
 				//bunnyEmitter.y = player.y + player.height * 0.5;

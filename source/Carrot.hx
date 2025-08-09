@@ -35,6 +35,15 @@ class Carrot extends FlxSprite
 		offset.x = 41 * size;
 		offset.y = 13 * size;
 
+		if (size == 8) {
+			width -= 100;
+			offset.x -= 195;
+			offset.y += 140;
+			x -= 195;
+			y += 140;
+			carrotHealth = size = 16;
+		}
+
 	}
 
 	override public function update(elapsed:Float):Void
