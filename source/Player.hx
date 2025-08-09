@@ -12,7 +12,7 @@ class Player extends FlxSprite
 	static public var checkpointFlipped:Bool = false;
 	static public var level:Int = 1;
 
-	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 40, 46, 72, 100];
+	public var levelUpCarrotAmounts:Array<Int> = [5, 15, 27, 40, 60, 100, -1];
 	
 	static public inline var iSpeed:Float = 390;
 	public var speed:Float = 0;
@@ -37,10 +37,13 @@ class Player extends FlxSprite
 
 	var iOffsetY:Float = 74;
 	
+	var stepSoundTime:Float = 0.0;
+	var stepSoundTimeMax:Float = 0.2;
 
 	public function new(X:Float, Y:Float):Void
 	{
 		super(X, Y);
+
 
 		loadGraphic("assets/images/player.png", true, 200, 200);
 		animation.add("run", [0, 1, 2, 3], 8, true);
@@ -79,7 +82,7 @@ class Player extends FlxSprite
 
 		velocity.x = speed;
 
-		maxVelocity.y = 2650;
+		maxVelocity.y = 2400;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -230,6 +233,19 @@ class Player extends FlxSprite
 			}
 			animation.play("climb");
 		}
+
+
+		if (animation.name == "run" || animation.name == "climb") {
+			stepSoundTime -= elapsed;
+			if (stepSoundTime <= 0.0) {
+				stepSoundTime = 0.53333333 * (390 / speed);
+				var rand = FlxG.random.int(1, 6);
+				FlxG.sound.play("assets/sounds/step" + rand + ".mp3", 0.7 * (FlxG.camera.zoom + ((1.0 - FlxG.camera.zoom) * 0.5)));
+			}
+		}
+		else {
+			stepSoundTime = 0.0;
+		}
 		
 
 		super.update(elapsed);
@@ -279,8 +295,11 @@ class Player extends FlxSprite
 			levelUp();
 		}
 
-		cast(FlxG.state, PlayState).carrotHUDText.text = newValue + "/" + levelUpCarrotAmounts[level - 1];
-		
+		if (levelUpCarrotAmounts[level - 1] >= 0)
+			cast(FlxG.state, PlayState).carrotHUDText.text = newValue + "/" + levelUpCarrotAmounts[level - 1];
+		else
+			cast(FlxG.state, PlayState).carrotHUDText.text = newValue + "/?";
+
 		return carrots = newValue;
 	}
 

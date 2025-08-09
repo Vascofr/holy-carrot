@@ -55,7 +55,13 @@ class PlayState extends FlxState
 	var carrotHUDIcon:FlxSprite;
 	public var carrotHUDText:FlxText;
 
-	var startOver:Bool = false;
+	static var playingTranquilMusic:Bool = true;
+	static var waitingForMetalMusic:Bool = false;
+
+	static var tranquilMusic:FlxSound;
+	static var metalMusicTime:Float = 0.0;
+
+	var startOver:Bool = true;
 
 	override public function create():Void
 	{
@@ -64,7 +70,35 @@ class PlayState extends FlxState
 
 		if (firstRun) {
 			loadSave();
+
+			tranquilMusic = FlxG.sound.play("assets/music/tranquility.mp3", 1.0, true);
+			tranquilMusic.persist = true;
+
+			/*if (Player.checkpointNumber > 0) {
+				playingTranquilMusic = false;
+				waitingForMetalMusic = true;
+			}
+
+			if (playingTranquilMusic) {
+				FlxG.sound.playMusic("assets/music/tranquility.mp3", 1.0, true);
+			}
+			else if (waitingForMetalMusic){
+				metalMusic = FlxG.sound.play("assets/music/metal.mp3", 0.2);
+				waitingForMetalMusic = false;
+			}*/
 		}
+		else if (waitingForMetalMusic){
+			//if (metalMusic == null) {
+				FlxG.sound.playMusic("assets/music/metal.mp3", 0.2);
+			//}
+			//else {
+				//metalMusic.play();
+			//}
+			playingTranquilMusic = false;
+			waitingForMetalMusic = false;
+			metalMusicTime += 12.0;
+		}
+		
 
 		waitTimeBeforeStart = 0.4;
 
@@ -178,6 +212,27 @@ class PlayState extends FlxState
 		super.update(elapsed);
 
 
+		if (metalMusicTime > 0.0) {
+			metalMusicTime -= elapsed;
+			if (metalMusicTime <= 0.0) {
+				metalMusicTime = 0.0;
+				if (FlxG.sound.music != null) {
+					FlxG.sound.music.fadeOut(5.0);
+				}			
+				waitingForMetalMusic = false;
+				playingTranquilMusic = true;
+				if (tranquilMusic != null) {
+					tranquilMusic.play();
+					tranquilMusic.fadeIn(5.0);
+				}
+				else {
+					tranquilMusic = FlxG.sound.play("assets/music/tranquility.mp3", 1.0, true);
+					tranquilMusic.fadeIn(5.0);
+				}
+			}
+		}
+
+
 		if (player.speed > Player.iSpeed) {
 			var targetZoom = 1.0 - (player.speed - Player.iSpeed) * 0.0008;
 			if (targetZoom < 0.5) {
@@ -193,10 +248,6 @@ class PlayState extends FlxState
 
 		}
 
-		if (FlxG.keys.justPressed.X) {
-			FlxG.sound.play("assets/sounds/test.mp3", 0.4);
-		}
-		
 		FlxG.collide(player, tilemap, playerTileCollision);
 		FlxG.collide(bloodEmitter, tilemap);
 		FlxG.collide(bunnyEmitter, tilemap);
@@ -341,6 +392,23 @@ class PlayState extends FlxState
 	{
 		if (player.alive) {
 			player.deathBySawblade();
+
+			if (playingTranquilMusic) {
+				playingTranquilMusic = false;
+				if (tranquilMusic != null) {
+					tranquilMusic.fadeOut(0.15);
+				}
+				if (FlxG.sound.music != null) {
+					trace("metal music FlxG.sound.music.volume: " + FlxG.sound.music.volume);
+					if (FlxG.sound.music.volume < 0.05) {
+						FlxG.sound.music.fadeOut(0.15);
+					}
+					else {
+						FlxG.sound.music.fadeIn(0.5, FlxG.sound.music.volume, 0.2);
+					}
+				}
+				waitingForMetalMusic = true;
+			}
 			
 			bloodEmitter.x = player.x + player.width * 0.5;
 			bloodEmitter.y = player.y + player.height * 0.5;
