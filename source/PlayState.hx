@@ -31,6 +31,7 @@ class PlayState extends FlxState
 	var ogmoLoader:FlxOgmo3Loader;
 	var tilemap:FlxTilemap;
 	var bgTilemap:FlxTilemap;
+	var fgTilemap:FlxTilemap;
 
 	var player:Player;
 	var carrots = new FlxTypedGroup<Carrot>();
@@ -61,7 +62,7 @@ class PlayState extends FlxState
 	static var tranquilMusic:FlxSound;
 	static var metalMusicTime:Float = 0.0;
 
-	var startOver:Bool = true;
+	var startOver:Bool = false;
 
 	override public function create():Void
 	{
@@ -89,7 +90,10 @@ class PlayState extends FlxState
 		}
 		else if (waitingForMetalMusic){
 			//if (metalMusic == null) {
+			new FlxTimer(timers).start(0.2, function(t:FlxTimer) {
 				FlxG.sound.playMusic("assets/music/metal.mp3", 0.2);
+			});
+				
 			//}
 			//else {
 				//metalMusic.play();
@@ -123,7 +127,6 @@ class PlayState extends FlxState
 
 		bgTilemap = ogmoLoader.loadTilemap("assets/ogmo/tilemap.png", "background");
 		bgTilemap.frames = FlxTileFrames.fromBitmapAddSpacesAndBorders("assets/ogmo/tilemap.png", new FlxPoint(100, 100), new FlxPoint(0, 0), new FlxPoint(1, 1));
-		bgTilemap.follow();
 		add(bgTilemap);
 
 		tilemap = ogmoLoader.loadTilemap("assets/ogmo/tilemap.png", "ground");
@@ -134,6 +137,8 @@ class PlayState extends FlxState
 		add(checkpoints);
 		add(carrots);
 		add(sawblades);
+
+		
 
 		bloodEmitter = new FlxEmitter(FlxG.width * 0.5, FlxG.height * 0.5, 50);
 		bloodEmitter.particleClass = BloodParticle;
@@ -184,6 +189,11 @@ class PlayState extends FlxState
 			cast(decal, FlxSprite).offset.x = Std.int(cast(decal, FlxSprite).offset.x);
 			cast(decal, FlxSprite).offset.y = Std.int(cast(decal, FlxSprite).offset.y);
 		});*/
+
+
+		fgTilemap = ogmoLoader.loadTilemap("assets/ogmo/tilemap.png", "foreground");
+		fgTilemap.frames = FlxTileFrames.fromBitmapAddSpacesAndBorders("assets/ogmo/tilemap.png", new FlxPoint(100, 100), new FlxPoint(0, 0), new FlxPoint(1, 1));
+		add(fgTilemap);
 
 
 		fadeSprite = new FlxSprite(0, 0);

@@ -42,6 +42,15 @@
       "exportID": "30989520",
       "requiredTags": [],
       "excludedTags": []
+    },
+    {
+      "definition": "tile",
+      "name": "foreground",
+      "gridSize": {"x": 100, "y": 100},
+      "exportID": "74316252",
+      "exportMode": 0,
+      "arrayMode": 0,
+      "defaultTileset": "ground"
     }
   ],
   "entities": [
