@@ -82,7 +82,7 @@ class Player extends FlxSprite
 
 		velocity.x = speed;
 
-		maxVelocity.y = 2400;
+		maxVelocity.y = 2500;
 	}
 
 	override public function update(elapsed:Float):Void
@@ -90,7 +90,7 @@ class Player extends FlxSprite
 		if (!alive) return;
 
 		//trace("carrots: " + carrots);
-
+		trace("x: " + x);
 
 		if (facingRight) {
 			if (velocity.x <= 0.1) {
@@ -245,6 +245,20 @@ class Player extends FlxSprite
 		}
 		else {
 			stepSoundTime = 0.0;
+		}
+
+		if (x < 25) {
+			x = 25;
+			if (isTouching(DOWN)) {
+				facingRight = true;
+			}
+		}
+		else if (x > 18100) {
+			x = 18100;
+			if (isTouching(DOWN)) {
+				facingRight = false;
+
+			}
 		}
 		
 

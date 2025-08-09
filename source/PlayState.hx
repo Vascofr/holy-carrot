@@ -406,10 +406,10 @@ class PlayState extends FlxState
 			if (playingTranquilMusic) {
 				playingTranquilMusic = false;
 				if (tranquilMusic != null) {
+
 					tranquilMusic.fadeOut(0.15);
 				}
 				if (FlxG.sound.music != null) {
-					trace("metal music FlxG.sound.music.volume: " + FlxG.sound.music.volume);
 					if (FlxG.sound.music.volume < 0.05) {
 						FlxG.sound.music.fadeOut(0.15);
 					}
@@ -463,15 +463,14 @@ class PlayState extends FlxState
 
 
 			new FlxTimer(timers).start(3.65, function(t:FlxTimer) {
-
-				
-				
+	
 
 				FlxG.camera.fade(FlxG.camera.bgColor, 0.3, function() {
 
-					// trying to prevent flickering //
+					// to prevent flickering //
 					tilemap.exists = false;
 					bgTilemap.exists = false;
+					fgTilemap.exists = false;
 					bloodEmitter.exists = false;  
 					bunnyEmitter.exists = false;
 					sawblades.exists = false;
