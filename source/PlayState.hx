@@ -459,21 +459,21 @@ class PlayState extends FlxState
 					else {
 						//if (FlxG.sound.music.fadeTween != null) FlxG.sound.music.fadeTween.cancel();
 						FlxG.sound.music.fadeIn(0.5, FlxG.sound.music.volume, 0.45);
-						if (metalMusicTime < 7) {
+						if (metalMusicTime < 4) {
 							metalMusicTime += 12;
 						}
 					}
 				}
 				else {
 					waitingForMetalMusic = true;
-					if (metalMusicTime < 7) {
+					if (metalMusicTime < 4) {
 						metalMusicTime += 12;
 					}
 				}
 				
 			}
 			else {
-				if (metalMusicTime < 7) {
+				if (metalMusicTime < 4) {
 					metalMusicTime += 12;
 				}
 			}
