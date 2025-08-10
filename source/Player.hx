@@ -136,10 +136,11 @@ class Player extends FlxSprite
 				}
 			}
 
-			if (y < 155) {
-				FlxG.camera.fade(0xffffffff, 3.5, false, 
+			if (y < 400) {
+				//FlxG.sound.music.fadeOut()
+				FlxG.camera.fade(0xffffffff, 6.5, false, 
 					function() {
-						FlxG.switchState(PlayState.new);
+						FlxG.switchState(Credits.new);
 					}
 				);
 			}
