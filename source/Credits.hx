@@ -54,7 +54,16 @@ Sawblade shape from ClipartMax
 
 
 
-Thank you for playing");
+Thank you for playing!
+
+" + "Time to complete: " + formatTime(totalTime));
+
+		if (FlxG.save.bind("player")) {
+			if (FlxG.save.data.bestGameTime != null) {
+				creditsText.text += "\nBest time: " + formatTime(FlxG.save.data.bestGameTime) + "\n";
+			}
+		}
+
 		creditsText.setFormat("assets/fonts/ChelseaMarket-Regular.ttf", 52, 0xffffffff, FlxTextAlign.CENTER);
 		creditsText.velocity.y = -88;
 		add(creditsText);
@@ -70,13 +79,13 @@ Thank you for playing");
 		super.update(elapsed);
 		totalTime += elapsed;
 
-		if (!startedFadeOut && totalTime > 32) {
+		if (!startedFadeOut && totalTime > 34) {
 			startedFadeOut = true;
 			if (FlxG.sound.music != null) {
-				FlxG.sound.music.fadeOut(3.0);
+				FlxG.sound.music.fadeOut(3.5);
 			}
 
-			FlxG.camera.fade(0xff000000, 3.0, false, function() {
+			FlxG.camera.fade(0xff000000, 3.5, false, function() {
 				FlxG.switchState(PlayState.new);
 			});
 		}
@@ -85,5 +94,16 @@ Thank you for playing");
 
 	}
 
+	function formatTime(totalSeconds:Float):String {
+    	var hours = Std.int(totalSeconds / 3600);
+	    var minutes = Std.int((totalSeconds % 3600) / 60);
+	    var seconds = Std.int(totalSeconds % 60);
+	    var milliseconds = Std.int((totalSeconds * 100) % 100); // two decimal places
+
+	    return hours + "h" +
+        	StringTools.lpad(Std.string(minutes), "0", 2) + "m" +
+        	StringTools.lpad(Std.string(seconds), "0", 2) + "." +
+        	StringTools.lpad(Std.string(milliseconds), "0", 2) + "s";
+	}
 
 }

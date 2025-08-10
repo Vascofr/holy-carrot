@@ -63,6 +63,9 @@ class PlayState extends FlxState
 	static var metalMusicTime:Float = 0.0;
 
 	static public var startOver:Bool = false;
+	var playTranquilMusicAtStart:Bool = false;
+
+	public static var gameTime:Float = 0.0;
 
 	override public function create():Void
 	{
@@ -75,16 +78,14 @@ class PlayState extends FlxState
 			if (tranquilMusic != null)
 				tranquilMusic.stop();
 
-			tranquilMusic = FlxG.sound.play("assets/music/tranquility.mp3", 1.0, true);
-			tranquilMusic.persist = true;
-
+			playTranquilMusicAtStart = true;
 		}
 		else if (waitingForMetalMusic){
 			FlxG.sound.playMusic("assets/music/metal.mp3", 0.23);
 
 			playingTranquilMusic = false;
 			waitingForMetalMusic = false;
-			metalMusicTime += 12.0;
+			metalMusicTime += 12.5;
 		}
 		
 
@@ -194,8 +195,17 @@ class PlayState extends FlxState
 			waitTimeBeforeStart -= elapsed;
 			if (waitTimeBeforeStart <= 0.0) {
 				fadeSprite.exists = false;
+
+				if (playTranquilMusicAtStart) {
+					new FlxTimer(timers).start(0.43, function(t:FlxTimer) {
+						if (tranquilMusic != null) tranquilMusic.stop();
+						tranquilMusic = FlxG.sound.play("assets/music/tranquility.mp3", 1.0, true);
+						tranquilMusic.persist = true;
+					});
+				}
 			}
 			FlxG.camera.fade(FlxG.camera.bgColor, 0.2, true, null, true);
+		
 
 			return;
 		}
@@ -204,6 +214,9 @@ class PlayState extends FlxState
 
 		super.update(elapsed);
 
+		if (!player.finalSequence) {
+			gameTime += elapsed;
+		}
 
 		if (metalMusicTime > 0.0) {
 			metalMusicTime -= elapsed;
@@ -259,7 +272,6 @@ class PlayState extends FlxState
 		#if html5
 		FlxG.log.redirectTraces = true;
 		#end
-		//FlxG.camera.antialiasing = true;
 		FlxG.camera.bgColor = 0xff8d57f7;
 		FlxG.worldBounds.set(-100000, -100000, 200000, 200000);
 
@@ -365,17 +377,29 @@ class PlayState extends FlxState
 			carrot.state = 1;
 			carrot.carrotHealth--;
 			carrot.y -= 67;
+
+			FlxG.sound.play("assets/sounds/dig2_1.wav", 0.8).pitch = FlxG.random.float(0.9, 1.25);
+
 			if (carrot.size == 16) carrot.y += 27;  // Holy Carrot
 			
 			if (carrot.carrotHealth <= 0) {
 				carrot.flash();
 				carrot.clipRect = null;
 				if (carrot.size == 16) {
-					FlxG.sound.play("assets/sounds/Angel Choir Steady Ahhhh - Sound Effect(FXssoundwarehouse).mp3", 0.7);
+					FlxG.sound.play("assets/sounds/Angel Choir Steady Ahhhh - Sound Effect(FXssoundwarehouse).mp3", 0.6);
 					FlxG.camera.flash(0x88ffffff, 0.7);
 					carrot.velocity.y = -100;
 					carrot.state = 4;
 					player.finalSequence = true;
+
+					if (FlxG.save.bind("player")) {
+						FlxG.save.data.gameTime = PlayState.gameTime;
+						if (FlxG.save.data.bestGameTime == null || PlayState.gameTime < FlxG.save.data.bestGameTime) {
+							FlxG.save.data.bestGameTime = PlayState.gameTime;
+						}
+						FlxG.save.flush();
+					}
+
 					player.animation.play("jump");
 					FlxTween.tween(player, { y: carrot.y + carrot.height * 0.35 }, 2.0);
 					//FlxTween.tween(FlxG, { timeScale: 0.5 }, 0.8);
@@ -441,16 +465,9 @@ class PlayState extends FlxState
 
 				bloodEmitter.emitting = true;
 
-				//sawbladeSound = FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
 				FlxG.timeScale = 0.4;
-				//sawbladeSound.pitch = 0.9;
-				FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.0, { ease: FlxEase.quadOut });
-				//FlxTween.tween(sawbladeSound, { pitch: 1.0 }, 1.0, { ease: FlxEase.quadOut });
 
-				//bunnyEmitter.x = player.x + player.width * 0.5;
-				//bunnyEmitter.y = player.y + player.height * 0.5;
-				//player.kill();
-				//bunnyEmitter.start(true);
+				FlxTween.tween(FlxG, { timeScale: 1.0 }, 1.0, { ease: FlxEase.quadOut });
 			});
 
 			new FlxTimer(timers).start(0.31, function(t:FlxTimer) {
@@ -506,6 +523,8 @@ class PlayState extends FlxState
 		checkpoint.animation.play("on");
 		checkpoint.flash();
 
+		FlxG.sound.play("assets/sounds/checkpoint1.wav", 0.4);
+
 		if (Player.checkpoint == null) {
 			Player.checkpoint = new FlxPoint(checkpoint.x + checkpoint.width * 0.5, checkpoint.y + checkpoint.height - 54);
 		}
@@ -529,7 +548,9 @@ class PlayState extends FlxState
 				FlxG.save.data.checkpointX = null;
 				FlxG.save.data.checkpointY = null;
 				FlxG.save.data.checkpointFlipped = null;
+				FlxG.save.data.gameTime = null;
 				FlxG.save.flush();
+				gameTime = 0.0;
 			}
 
 			startOver = false;
@@ -539,6 +560,7 @@ class PlayState extends FlxState
 				Player.checkpointNumber = FlxG.save.data.checkpointNumber;
 				Player.checkpoint = new FlxPoint(FlxG.save.data.checkpointX, FlxG.save.data.checkpointY);
 				Player.checkpointFlipped = FlxG.save.data.checkpointFlipped;
+				gameTime = FlxG.save.data.gameTime;
 			}
 		}
 	}
@@ -549,6 +571,7 @@ class PlayState extends FlxState
 			FlxG.save.data.checkpointX = Player.checkpoint.x;
 			FlxG.save.data.checkpointY = Player.checkpoint.y;
 			FlxG.save.data.checkpointFlipped = Player.checkpointFlipped;
+			FlxG.save.data.gameTime = gameTime;
 			FlxG.save.flush();
 		}
 	}

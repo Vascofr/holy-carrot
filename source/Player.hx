@@ -1,5 +1,6 @@
 package;
 
+import flixel.sound.FlxSound;
 import flixel.math.FlxPoint;
 import flixel.effects.particles.FlxEmitter;
 import flixel.FlxG;
@@ -205,7 +206,7 @@ class Player extends FlxSprite
 				velocity.y = -jumpHeight;
 				jumpBuffer = 0.0;
 				wallJumpBuffer = 0.0;
-				FlxG.sound.play("assets/sounds/jump.mp3", 1.0);
+				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.8).pitch = FlxG.random.float(0.9, 1.1);
 				animation.play("jump");
 			}
 
@@ -221,6 +222,8 @@ class Player extends FlxSprite
 
 				jumpBuffer = 0.0;
 				wallJumpBuffer = 0.0;
+
+				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.8).pitch = FlxG.random.float(0.9, 1.1);
 			}
 			else if (isTouching(LEFT)) {
 				velocity.y = -jumpHeight * 0.6;
@@ -229,6 +232,8 @@ class Player extends FlxSprite
 
 				jumpBuffer = 0.0;
 				wallJumpBuffer = 0.0;
+
+				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.8).pitch = FlxG.random.float(0.9, 1.1);
 			}
 
 			wallJumpBuffer -= elapsed;
@@ -372,7 +377,10 @@ class Player extends FlxSprite
 
 
 		if (PlayState.waitTimeBeforeStart <= 0.0 && !effectOnly) {
-			FlxG.camera.flash(0xccffffff, 0.7);
+			FlxG.sound.play("assets/sounds/levelup1.wav", 0.5);
+			FlxG.camera.flash(0xccffffff, 0.7, function() {
+				cast(FlxG.state, PlayState).openSubState(new LevelUp());
+			});
 		}
 	}
 
@@ -387,6 +395,10 @@ class Player extends FlxSprite
 		else
 			cast(FlxG.state, PlayState).carrotHUDText.text = newValue + "/?";
 
+		if (PlayState.waitTimeBeforeStart <= 0.0) {
+			FlxG.sound.play("assets/sounds/collect.mp3", 0.5).pitch = FlxG.random.float(0.95, 1.25);
+		}
+
 		return carrots = newValue;
 	}
 
@@ -396,12 +408,13 @@ class Player extends FlxSprite
 	}
 
 	public function deathBySawblade() {
-		//FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
 		alive = false;
 		velocity.set(0, 0);
 		setColorTransform(1.5, 1.5, 1.5);
-		//FlxG.sound.play("assets/sounds/sawblade_start.mp3", 0.4);
 		FlxG.sound.play("assets/sounds/sawblade.mp3", 0.4);
-
+		if (FlxG.save.bind("player")) {
+			FlxG.save.data.gameTime = PlayState.gameTime;
+			FlxG.save.flush();
+		}
 	}
 }

@@ -29,8 +29,8 @@
 	<!-- _____________________________ Path Settings ____________________________ -->
 
 	<set name="BUILD_DIR" value="export" />
-	<classpath name="source" />
-	<assets path="assets" />
+	<classpath name="source" />	
+	<assets path="assets" exclude="ogmo/carrot.png|ogmo/carrot_x2.png|ogmo/carrot_x8.png|ogmo\player.png|ogmo/sawblade.png|ogmo/sunflower.png" />
 
 	<haxedef name="web-audio" />
 
