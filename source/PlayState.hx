@@ -1,6 +1,6 @@
 package;
 
-import js.html.audio.MediaElementAudioSourceNode;
+
 import flixel.text.FlxText;
 import particles.BunnyParticle;
 import particles.BloodParticle;
@@ -214,7 +214,9 @@ class PlayState extends FlxState
 			return;
 		}
 
-		//FlxG.timeScale = 1.2;
+		#if debug
+		trace("gameTime: " + gameTime);
+		#end
 
 		super.update(elapsed);
 
@@ -464,7 +466,7 @@ class PlayState extends FlxState
 				
 			}
 
-			metalMusicTime += 12.0;
+			metalMusicTime += 12.5;
 			
 			bloodEmitter.x = player.x + player.width * 0.5;
 			bloodEmitter.y = player.y + player.height * 0.5;
@@ -564,8 +566,17 @@ class PlayState extends FlxState
 				FlxG.save.data.checkpointFlipped = null;
 				FlxG.save.data.gameTime = null;
 				FlxG.save.flush();
+				
+
+				Credits.playTime = gameTime;
 				gameTime = 0.0;
 			}
+
+			Player.checkpointNumber = 0;
+			Player.checkpoint = null;
+			Player.checkpointFlipped = false;
+			Player.level = 1;
+
 
 			startOver = false;
 		}

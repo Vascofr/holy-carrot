@@ -81,7 +81,7 @@ class LevelUp extends FlxSubState
         super.update(elapsed);
 
         timeOpen += elapsed;
-        if (timeOpen > 1.15) {
+        if (timeOpen > 0.95) {
             if (!closing && (FlxG.mouse.justPressed || FlxG.keys.justPressed.ANY)) {
                 closing = true;
                 FlxG.sound.play("assets/sounds/click.wav", 0.7);

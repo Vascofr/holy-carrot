@@ -12,6 +12,8 @@ class Credits extends FlxState
 	var totalTime:Float = 0.0;
 	var startedFadeOut:Bool = false;
 
+	static public var playTime:Float = 0.0;
+
 	override public function create():Void
 	{
 		super.create();
@@ -22,6 +24,8 @@ class Credits extends FlxState
 
 		FlxG.camera.bgColor = 0xff8d57f7;
 		FlxG.camera.fade(0xffffffff, 0.8, true, null, true);
+
+		if (playTime <= 0.0) playTime = PlayState.gameTime;
 
 		creditsText = new FlxText(0, FlxG.height, FlxG.width, "Holy Carrot is a game by
 Vasco Freitas
@@ -57,7 +61,7 @@ Sawblade shape from ClipartMax
 
 Thank you for playing!
 
-" + "Time to complete: " + formatTime(totalTime));
+" + "Time to complete: " + formatTime(playTime));
 
 		if (FlxG.save.bind("player")) {
 			if (FlxG.save.data.bestGameTime != null) {
@@ -83,11 +87,15 @@ Thank you for playing!
 		if (!startedFadeOut && totalTime > 34) {
 			startedFadeOut = true;
 			if (FlxG.sound.music != null) {
-				FlxG.sound.music.fadeOut(3.5);
+				FlxG.sound.music.fadeOut(3.0);
+			}
+			
+			if (PlayState.tranquilMusic != null) {
+				PlayState.tranquilMusic.fadeOut(3.0);
 			}
 
 			FlxG.camera.fade(0xff000000, 3.5, false, function() {
-				FlxG.switchState(PlayState.new);
+				FlxG.switchState(TitleScreen.new);
 			});
 		}
 
