@@ -16,8 +16,12 @@ class Credits extends FlxState
 	{
 		super.create();
 
+		if (PlayState.tranquilMusic != null) {
+			PlayState.tranquilMusic = FlxG.sound.play("assets/music/tranquility.mp3", 1.0, true);
+		}
+
 		FlxG.camera.bgColor = 0xff8d57f7;
-		FlxG.camera.fade(FlxG.camera.bgColor, 0.8, true, null, true);
+		FlxG.camera.fade(0xffffffff, 0.8, true, null, true);
 
 		creditsText = new FlxText(0, FlxG.height, FlxG.width, "Holy Carrot is a game by
 Vasco Freitas
@@ -25,7 +29,7 @@ Vasco Freitas
 Made in one week for 
 HaxeJam 2025: Summer jam
 
-The Jam Theme was
+The jam theme was
 \"Taking Root\"
 
 Carrots are roots
@@ -44,8 +48,10 @@ Audacity
 All assets created by Vasco Freitas
 
 With the exception of
-\"Ahhhh Choir\" sound effect from FXssoundwarehouse
-Sawblade silhouette from ClipartMax
+Chelsea Market font by Crystal Kluge
+\"Ahhhh Choir\" sound effect from FX Sound Warehouse
+Sawblade shape from ClipartMax
+
 
 
 Thank you for playing");

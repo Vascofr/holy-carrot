@@ -42,6 +42,8 @@ class Player extends FlxSprite
 
 	public var finalSequence:Bool = false;
 	var behindHolyCarrot:Bool = false;
+	var startedFadeCameraToCredits:Bool = false;
+	var startedFadeMusicToCredits:Bool = false;
 
 
 	public function new(X:Float, Y:Float):Void
@@ -93,6 +95,7 @@ class Player extends FlxSprite
 	{
 		if (!alive) return;
 
+
 		if (finalSequence) {
 			//speed = 400;
 			//spriteFlipSpeed = 8.0;
@@ -136,10 +139,26 @@ class Player extends FlxSprite
 				}
 			}
 
-			if (y < 400) {
-				//FlxG.sound.music.fadeOut()
-				FlxG.camera.fade(0xffffffff, 6.5, false, 
-					function() {
+
+			if (!startedFadeMusicToCredits && y < 1000) {
+				startedFadeMusicToCredits = true;
+
+				if (PlayState.tranquilMusic != null) {
+					PlayState.tranquilMusic.fadeOut(5.0, 0, function(_) {
+						PlayState.tranquilMusic.stop();
+					});
+				}
+			}
+
+
+			if (!startedFadeCameraToCredits && y < 600) {
+				startedFadeCameraToCredits = true;
+
+				PlayState.startOver = true;
+				cast(FlxG.state, PlayState).loadSave();  // will actually reset the game since PlayState.startOver is true
+				
+				FlxG.camera.fade(0xffffffff, 5.5, false, 
+					function() {						
 						FlxG.switchState(Credits.new);
 					}
 				);

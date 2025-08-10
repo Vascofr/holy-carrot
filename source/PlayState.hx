@@ -59,10 +59,10 @@ class PlayState extends FlxState
 	static var playingTranquilMusic:Bool = true;
 	static var waitingForMetalMusic:Bool = false;
 
-	static var tranquilMusic:FlxSound;
+	static public var tranquilMusic:FlxSound;
 	static var metalMusicTime:Float = 0.0;
 
-	var startOver:Bool = false;
+	static public var startOver:Bool = false;
 
 	override public function create():Void
 	{
@@ -72,32 +72,16 @@ class PlayState extends FlxState
 		if (firstRun) {
 			loadSave();
 
+			if (tranquilMusic != null)
+				tranquilMusic.stop();
+
 			tranquilMusic = FlxG.sound.play("assets/music/tranquility.mp3", 1.0, true);
 			tranquilMusic.persist = true;
 
-			/*if (Player.checkpointNumber > 0) {
-				playingTranquilMusic = false;
-				waitingForMetalMusic = true;
-			}
-
-			if (playingTranquilMusic) {
-				FlxG.sound.playMusic("assets/music/tranquility.mp3", 1.0, true);
-			}
-			else if (waitingForMetalMusic){
-				metalMusic = FlxG.sound.play("assets/music/metal.mp3", 0.2);
-				waitingForMetalMusic = false;
-			}*/
 		}
 		else if (waitingForMetalMusic){
-			//if (metalMusic == null) {
-			//new FlxTimer(timers).start(0.1, function(t:FlxTimer) {
-				FlxG.sound.playMusic("assets/music/metal.mp3", 0.2);
-			//});
-				
-			//}
-			//else {
-				//metalMusic.play();
-			//}
+			FlxG.sound.playMusic("assets/music/metal.mp3", 0.23);
+
 			playingTranquilMusic = false;
 			waitingForMetalMusic = false;
 			metalMusicTime += 12.0;
@@ -388,6 +372,7 @@ class PlayState extends FlxState
 				carrot.clipRect = null;
 				if (carrot.size == 16) {
 					FlxG.sound.play("assets/sounds/Angel Choir Steady Ahhhh - Sound Effect(FXssoundwarehouse).mp3", 0.7);
+					FlxG.camera.flash(0x88ffffff, 0.7);
 					carrot.velocity.y = -100;
 					carrot.state = 4;
 					player.finalSequence = true;
@@ -536,7 +521,7 @@ class PlayState extends FlxState
 		//FlxG.sound.play("assets/sounds/checkpoint.mp3", 0.4);
 	}
 
-	function loadSave() {
+	public function loadSave() {
 		if (startOver) {
 			if (FlxG.save.bind("player")) {
 				// delete save if starting over //
