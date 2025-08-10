@@ -13,11 +13,6 @@ class BloodParticle extends FlxParticle
     public function new()
     {
         super();
-        /*if (width > 0) {
-            width -= 6;
-            offset.x += 3;
-        }
-        offset.y = -25;*/
     }
 
     override public function update(elapsed:Float):Void
@@ -36,33 +31,6 @@ class BloodParticle extends FlxParticle
             acceleration.y *= 12;
         }
 
-        /*
-        if (isTouching(LEFT) || isTouching(RIGHT)) {
-            active = false;
-            velocity.set(0.0, 0.0);
-            acceleration.set(0.0, 0.0);
-            drag.y = 1000;
-            //if (scale.y < 1.0) {
-            //    scale.y += elapsed * 0.5;
-            //}
-            angle = 0.0;
-            angularVelocity = 0.0;
-            angularAcceleration = 0.0;
-        }
-        else if (isTouching(UP) || isTouching(DOWN)) {
-            active = false;
-            velocity.set(0.0, 0.0);
-            acceleration.set(0.0, 0.0);
-            drag.x = 1000;
-            if (scale.x < 1.0) {
-                scale.x += elapsed * 0.5;
-            }
-            angle = 0.0;
-            angularVelocity = 0.0;
-            angularAcceleration = 0.0;
-
-            
-        }*/
 
         if (isTouching(DOWN)) {
             //active = false;

@@ -81,11 +81,14 @@ class PlayState extends FlxState
 			playTranquilMusicAtStart = true;
 		}
 		else if (waitingForMetalMusic){
-			FlxG.sound.playMusic("assets/music/metal.mp3", 0.23);
+			FlxG.sound.playMusic("assets/music/metal.mp3", 0.45);
+
+			if (tranquilMusic != null)
+				tranquilMusic.stop();
 
 			playingTranquilMusic = false;
 			waitingForMetalMusic = false;
-			metalMusicTime += 12.5;
+			metalMusicTime += 12.2;
 		}
 		
 
@@ -446,7 +449,7 @@ class PlayState extends FlxState
 						FlxG.sound.music.fadeOut(0.15);
 					}
 					else {
-						FlxG.sound.music.fadeIn(0.5, FlxG.sound.music.volume, 0.2);
+						FlxG.sound.music.fadeIn(0.5, FlxG.sound.music.volume, 0.45);
 					}
 				}
 				waitingForMetalMusic = true;

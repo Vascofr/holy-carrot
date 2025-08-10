@@ -43,6 +43,7 @@ Visual Studio Code
 Ogmo Editor
 PaintShop Pro
 LabChirp
+FL Studio (drums)
 Audacity
 
 All assets created by Vasco Freitas

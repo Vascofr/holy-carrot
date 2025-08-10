@@ -206,7 +206,7 @@ class Player extends FlxSprite
 				velocity.y = -jumpHeight;
 				jumpBuffer = 0.0;
 				wallJumpBuffer = 0.0;
-				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.8).pitch = FlxG.random.float(0.9, 1.1);
+				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.7).pitch = FlxG.random.float(0.9, 1.1);
 				animation.play("jump");
 			}
 
@@ -223,7 +223,7 @@ class Player extends FlxSprite
 				jumpBuffer = 0.0;
 				wallJumpBuffer = 0.0;
 
-				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.8).pitch = FlxG.random.float(0.9, 1.1);
+				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.7).pitch = FlxG.random.float(0.9, 1.1);
 			}
 			else if (isTouching(LEFT)) {
 				velocity.y = -jumpHeight * 0.6;
@@ -233,7 +233,7 @@ class Player extends FlxSprite
 				jumpBuffer = 0.0;
 				wallJumpBuffer = 0.0;
 
-				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.8).pitch = FlxG.random.float(0.9, 1.1);
+				FlxG.sound.play("assets/sounds/jump2_2.wav", 0.7).pitch = FlxG.random.float(0.9, 1.1);
 			}
 
 			wallJumpBuffer -= elapsed;
