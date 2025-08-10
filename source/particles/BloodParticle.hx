@@ -23,7 +23,6 @@ class BloodParticle extends FlxParticle
             offset.x = Std.int((width - 4) * 0.5);
             width = 4;
             height = 4;
-            //offset.y = -6;
 
             velocity.x *= 14;
             velocity.y *= 14;

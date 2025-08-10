@@ -1,5 +1,6 @@
 package;
 
+import js.html.audio.MediaElementAudioSourceNode;
 import flixel.text.FlxText;
 import particles.BunnyParticle;
 import particles.BloodParticle;
@@ -83,8 +84,8 @@ class PlayState extends FlxState
 		else if (waitingForMetalMusic){
 			FlxG.sound.playMusic("assets/music/metal.mp3", 0.45);
 
-			if (tranquilMusic != null)
-				tranquilMusic.stop();
+			//if (tranquilMusic != null)
+			//	tranquilMusic.stop();
 
 			playingTranquilMusic = false;
 			waitingForMetalMusic = false;
@@ -223,6 +224,11 @@ class PlayState extends FlxState
 
 		if (metalMusicTime > 0.0) {
 			metalMusicTime -= elapsed;
+
+			#if debug
+			trace("metalMusicTime: " + metalMusicTime);
+			#end
+
 			if (metalMusicTime <= 0.0) {
 				metalMusicTime = 0.0;
 				if (FlxG.sound.music != null) {
@@ -441,18 +447,31 @@ class PlayState extends FlxState
 			if (playingTranquilMusic) {
 				playingTranquilMusic = false;
 				if (tranquilMusic != null) {
-
+					//if (tranquilMusic.fadeTween != null) tranquilMusic.fadeTween.cancel();
 					tranquilMusic.fadeOut(0.15);
 				}
 				if (FlxG.sound.music != null) {
 					if (FlxG.sound.music.volume < 0.05) {
+						//if (FlxG.sound.music.fadeTween != null) FlxG.sound.music.fadeTween.cancel();
 						FlxG.sound.music.fadeOut(0.15);
+						waitingForMetalMusic = true;
 					}
 					else {
+						//if (FlxG.sound.music.fadeTween != null) FlxG.sound.music.fadeTween.cancel();
 						FlxG.sound.music.fadeIn(0.5, FlxG.sound.music.volume, 0.45);
+						//if (metalMusicTime < 12) {
+							metalMusicTime += 12;
+						//}
 					}
 				}
-				waitingForMetalMusic = true;
+				else {
+					waitingForMetalMusic = true;
+					metalMusicTime += 12;
+				}
+				
+			}
+			else {
+				metalMusicTime += 12;
 			}
 			
 			bloodEmitter.x = player.x + player.width * 0.5;
