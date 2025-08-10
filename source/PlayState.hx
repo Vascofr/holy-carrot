@@ -89,7 +89,7 @@ class PlayState extends FlxState
 
 			playingTranquilMusic = false;
 			waitingForMetalMusic = false;
-			metalMusicTime += 12.2;
+			//metalMusicTime += 12.2;
 		}
 		
 
@@ -447,36 +447,24 @@ class PlayState extends FlxState
 			if (playingTranquilMusic) {
 				playingTranquilMusic = false;
 				if (tranquilMusic != null) {
-					//if (tranquilMusic.fadeTween != null) tranquilMusic.fadeTween.cancel();
 					tranquilMusic.fadeOut(0.15);
 				}
 				if (FlxG.sound.music != null) {
 					if (FlxG.sound.music.volume < 0.05) {
-						//if (FlxG.sound.music.fadeTween != null) FlxG.sound.music.fadeTween.cancel();
 						FlxG.sound.music.fadeOut(0.15);
 						waitingForMetalMusic = true;
 					}
 					else {
-						//if (FlxG.sound.music.fadeTween != null) FlxG.sound.music.fadeTween.cancel();
 						FlxG.sound.music.fadeIn(0.5, FlxG.sound.music.volume, 0.45);
-						if (metalMusicTime < 4) {
-							metalMusicTime += 12;
-						}
 					}
 				}
 				else {
 					waitingForMetalMusic = true;
-					if (metalMusicTime < 4) {
-						metalMusicTime += 12;
-					}
 				}
 				
 			}
-			else {
-				if (metalMusicTime < 4) {
-					metalMusicTime += 12;
-				}
-			}
+
+			metalMusicTime += 12.0;
 			
 			bloodEmitter.x = player.x + player.width * 0.5;
 			bloodEmitter.y = player.y + player.height * 0.5;
