@@ -459,19 +459,23 @@ class PlayState extends FlxState
 					else {
 						//if (FlxG.sound.music.fadeTween != null) FlxG.sound.music.fadeTween.cancel();
 						FlxG.sound.music.fadeIn(0.5, FlxG.sound.music.volume, 0.45);
-						//if (metalMusicTime < 12) {
+						if (metalMusicTime < 11) {
 							metalMusicTime += 12;
-						//}
+						}
 					}
 				}
 				else {
 					waitingForMetalMusic = true;
-					metalMusicTime += 12;
+					if (metalMusicTime < 11) {
+						metalMusicTime += 12;
+					}
 				}
 				
 			}
 			else {
-				metalMusicTime += 12;
+				if (metalMusicTime < 11) {
+					metalMusicTime += 12;
+				}
 			}
 			
 			bloodEmitter.x = player.x + player.width * 0.5;
